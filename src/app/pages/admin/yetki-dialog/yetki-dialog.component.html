@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>
+  Yetkiler - {{ data.user.ad }} {{ data.user.soyad }}
+</h2>
+
+<mat-dialog-content>
+
+  <p *ngIf="loading">Yükleniyor...</p>
+  <p *ngIf="error" style="color:red;">{{ error }}</p>
+
+  <div *ngIf="!loading">
+
+    <div *ngFor="let g of groups" style="margin-bottom:14px;">
+
+      <div style="font-weight:700; margin-bottom:6px;">
+        {{ g.title }}
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+
+        <mat-checkbox
+          *ngFor="let p of g.perms"
+          [checked]="isChecked(p)"
+          (change)="toggle(p, $event.checked)">
+
+          {{ permLabels[p] || p }}
+
+        </mat-checkbox>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>İptal</button>
+
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="kaydet()"
+    [disabled]="loading">
+    Kaydet
+  </button>
+</mat-dialog-actions>

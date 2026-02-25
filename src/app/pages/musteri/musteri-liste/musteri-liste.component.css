@@ -1,0 +1,28 @@
+.arama-card {
+  margin-top: 16px;
+}
+
+.arama-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: left;
+  padding: 16px;
+}
+
+.arama-input-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.arama-button-row {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+
+
+
+

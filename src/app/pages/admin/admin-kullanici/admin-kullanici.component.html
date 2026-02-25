@@ -1,0 +1,200 @@
+<mat-card>
+  <h2>Admin Panel - Kullanıcılar</h2>
+  <div style="display:flex; justify-content:flex-start; margin-top:10px;">
+  <button mat-raised-button color="primary" (click)="kullaniciEkleAc()">
+    Kullanıcı ekle
+  </button>
+</div>
+  <p *ngIf="loading" style="margin-top:12px;">Yükleniyor...</p>
+  <p *ngIf="error" style="color:red; margin-top:12px;">{{ error }}</p>
+
+  <table mat-table [dataSource]="users" class="mat-elevation-z2" style="width:100%; margin-top:12px;">
+
+<ng-container matColumnDef="kullaniciadi">
+  <th mat-header-cell *matHeaderCellDef>Kullanıcı Adı</th>
+  <td mat-cell *matCellDef="let u">{{ u.kullaniciadi }}</td>
+</ng-container>
+
+<ng-container matColumnDef="adsoyad">
+  <th mat-header-cell *matHeaderCellDef>Ad Soyad</th>
+  <td mat-cell *matCellDef="let u">{{ u.ad }} {{ u.soyad }}</td>
+</ng-container>
+
+<ng-container matColumnDef="rol">
+  <th mat-header-cell *matHeaderCellDef>Rol</th>
+  <td mat-cell *matCellDef="let u">{{ u.rol }}</td>
+</ng-container>
+
+<ng-container matColumnDef="aktif">
+  <th mat-header-cell *matHeaderCellDef>Durum</th>
+  <td mat-cell *matCellDef="let u">
+    {{ u.aktif ? 'Aktif' : 'Pasif' }}
+  </td>
+</ng-container>
+
+<ng-container matColumnDef="islem">
+  <th mat-header-cell *matHeaderCellDef>İşlem</th>
+  <td mat-cell *matCellDef="let u">
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button mat-stroked-button color="primary" (click)="yetkilerAc(u)">
+        Yetkiler
+      </button>
+
+      <button mat-stroked-button
+              [color]="u.aktif ? 'warn' : 'accent'"
+              (click)="aktifPasifDegistir(u)">
+        {{ u.aktif ? 'Pasif Yap' : 'Aktif Yap' }}
+      </button>
+    </div>
+  </td>
+</ng-container>
+
+<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+<tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+
+  </table>
+</mat-card>
+
+<mat-card style="margin-top:16px;">
+  <h2>Dropdown Yönetimi</h2>
+
+  <div style="display:flex; gap:10px; margin-bottom:12px; align-items: baseline;">
+    <mat-form-field appearance="outline">
+      <mat-label>Yeni dropdown tipi</mat-label>
+      <input matInput [(ngModel)]="yeniTip">
+    </mat-form-field>
+
+
+<button mat-raised-button color="primary" (click)="tipEkle()">
+  Tip ekle
+</button>
+
+
+  </div>
+
+  <table mat-table [dataSource]="dropdownTipler" class="mat-elevation-z1" style="width:100%;">
+
+
+<ng-container matColumnDef="ad">
+  <th mat-header-cell *matHeaderCellDef> Tip </th>
+  <td mat-cell *matCellDef="let t"
+      (click)="tipSecildi(t.id)"
+      style="cursor:pointer"
+      [style.opacity]="t.aktif ? 1 : 0.5">
+    {{ t.ad }}
+  </td>
+</ng-container>
+
+<ng-container matColumnDef="aktif">
+  <th mat-header-cell *matHeaderCellDef> Durum </th>
+  <td mat-cell *matCellDef="let t">
+    {{ t.aktif ? 'Aktif' : 'Pasif' }}
+  </td>
+</ng-container>
+
+<ng-container matColumnDef="islem">
+  <th mat-header-cell *matHeaderCellDef> İşlem </th>
+  <td mat-cell *matCellDef="let t">
+    <button mat-stroked-button
+            [color]="t.aktif ? 'warn' : 'accent'"
+            (click)="tipAktifDegistir(t)">
+      {{ t.aktif ? 'Pasif Yap' : 'Aktif Yap' }}
+    </button>
+  </td>
+</ng-container>
+
+<tr mat-header-row *matHeaderRowDef="['ad','aktif','islem']"></tr>
+<tr mat-row *matRowDef="let row; columns: ['ad','aktif','islem'];"></tr>
+```
+
+  </table>
+</mat-card>
+
+<mat-card *ngIf="seciliTipId !== null" style="margin-top:16px;">
+
+  <h3>Seçenekler</h3>
+
+  <table mat-table [dataSource]="secenekler" class="mat-elevation-z1" style="width:100%;">
+
+```
+<ng-container matColumnDef="ad">
+  <th mat-header-cell *matHeaderCellDef> Seçenek </th>
+  <td mat-cell *matCellDef="let s" [style.opacity]="s.aktif ? 1 : 0.5">
+
+    <ng-container *ngIf="duzenlenenSecenekId !== s.id">
+      {{ s.ad }}
+    </ng-container>
+
+    <ng-container *ngIf="duzenlenenSecenekId === s.id">
+      <mat-form-field appearance="outline" style="width:200px;">
+        <input matInput [(ngModel)]="duzenlenenAd">
+      </mat-form-field>
+    </ng-container>
+
+  </td>
+</ng-container>
+
+<ng-container matColumnDef="aktif">
+  <th mat-header-cell *matHeaderCellDef> Durum </th>
+  <td mat-cell *matCellDef="let s">
+    {{ s.aktif ? 'Aktif' : 'Pasif' }}
+  </td>
+</ng-container>
+
+<ng-container matColumnDef="islem">
+  <th mat-header-cell *matHeaderCellDef> İşlem </th>
+  <td mat-cell *matCellDef="let s">
+
+    <ng-container *ngIf="duzenlenenSecenekId !== s.id">
+      <button mat-stroked-button color="primary"
+              (click)="secenekDuzenle(s)">
+        Düzenle
+      </button>
+
+      <button mat-stroked-button
+              [color]="s.aktif ? 'warn' : 'accent'"
+              (click)="secenekAktifPasif(s)">
+        {{ s.aktif ? 'Pasif Yap' : 'Aktif Yap' }}
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="duzenlenenSecenekId === s.id">
+      <button mat-raised-button color="primary"
+              (click)="secenekGuncelle(s)">
+        Kaydet
+      </button>
+
+      <button mat-stroked-button color="warn"
+              (click)="secenekDuzenIptal()">
+        İptal
+      </button>
+    </ng-container>
+
+  </td>
+</ng-container>
+
+<tr mat-header-row *matHeaderRowDef="['ad','aktif','islem']"></tr>
+<tr mat-row *matRowDef="let row; columns: ['ad','aktif','islem'];"></tr>
+
+
+  </table>
+
+  <div style="margin-top:12px; display:flex; gap:10px; align-items:baseline;">
+    <mat-form-field appearance="outline" style="width:250px;">
+      <mat-label>Yeni seçenek</mat-label>
+      <input matInput [(ngModel)]="yeniSecenek">
+    </mat-form-field>
+
+
+<button mat-raised-button
+        color="primary"
+        (click)="secenekEkle()"
+        [disabled]="!yeniSecenek">
+  Ekle
+</button>
+
+
+  </div>
+
+</mat-card>

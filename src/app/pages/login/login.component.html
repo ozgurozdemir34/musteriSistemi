@@ -1,0 +1,40 @@
+<div class="login-container">
+
+  <mat-card class="login-card">
+
+    <h2>Giriş Yap</h2>
+
+    <form [formGroup]="form" (ngSubmit)="login()">
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Kullanıcı Adı</mat-label>
+        <input matInput formControlName="kullaniciadi">
+        <mat-error *ngIf="form.get('kullaniciadi')?.invalid">
+          Zorunlu alan
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Şifre</mat-label>
+        <input matInput type="password" formControlName="sifre">
+        <mat-error *ngIf="form.get('sifre')?.invalid">
+          Zorunlu alan
+        </mat-error>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        class="full-width"
+        [disabled]="loading">
+
+        Giriş Yap
+
+      </button>
+
+    </form>
+
+  </mat-card>
+
+</div>

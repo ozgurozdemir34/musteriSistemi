@@ -1,0 +1,331 @@
+<mat-card class="arama-card">
+
+ <div class="arama-header">
+  <h2>Müşteri Arama</h2>
+  <button style="margin-top: 1px;" mat-raised-button
+          color="primary"
+          (click)="dialogAc()">
+    Yeni Müşteri
+  </button>
+   <button mat-raised-button
+        color="accent"
+        style="margin-left:10px;"
+        (click)="iletisimListesineGit()">
+  İletişim Listesi
+</button>
+
+     <button mat-stroked-button
+            color="warn"
+            (click)="cikis()">
+      Çıkış
+    </button>
+
+</div>
+
+
+  <form [formGroup]="aramaForm" (ngSubmit)="ara()">
+
+    <div class="arama-input-row" style="padding: 16px;">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Ad</mat-label>
+        <input matInput formControlName="ad">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Soyad</mat-label>
+        <input matInput formControlName="soyad">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Durum</mat-label>
+        <mat-select formControlName="durum">
+          <mat-option value="Aktif">Aktif</mat-option>
+          <mat-option value="Pasif">Pasif</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+      <mat-label>Telefon</mat-label>
+      <input matInput mask="(000) 000 00 00" formControlName="telefon">
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline">
+      <mat-label>Mail</mat-label>
+      <input matInput formControlName="mail">
+      </mat-form-field>
+
+    </div>
+
+    <div class="arama-button-row">
+      <button mat-raised-button color="primary" type="submit">
+        Ara
+      </button>
+
+      <button mat-stroked-button color="warn" type="button" (click)="temizle()">
+        Temizle
+      </button>
+    </div>
+   
+  </form>
+
+</mat-card>
+
+
+
+
+<mat-card *ngIf="listeGoster" style="margin-top:16px">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:16px;">
+    <div>
+      <h2>Müşteri Listesi</h2>
+      <p>Toplam {{ totalCount }} kayıt</p>
+    </div>
+
+    
+  </div>
+
+  <p *ngIf="loading">Yükleniyor...</p>
+  <p *ngIf="error" style="color:red;">{{ error }}</p>
+
+  <p *ngIf="aramaYapildi && musteriler.length === 0">
+    Kayıt bulunamadı.
+  </p>
+
+  <table mat-table
+         [dataSource]="musteriler"
+         multiTemplateDataRows
+         class="mat-elevation-z2"
+         *ngIf="!loading && musteriler.length > 0">
+
+   
+    <ng-container matColumnDef="ad">
+      <th mat-header-cell *matHeaderCellDef>Ad</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.ad }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="soyad">
+      <th mat-header-cell *matHeaderCellDef>Soyad</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.soyad }}
+      </td>
+    </ng-container>
+
+   
+    <ng-container matColumnDef="durum">
+      <th mat-header-cell *matHeaderCellDef>Durum</th>
+      <td mat-cell *matCellDef="let element">
+        <span [ngClass]="element.durum === 'Aktif' ? 'aktif' : 'pasif'">
+          {{ element.durum }}
+        </span>
+      </td>
+    </ng-container>
+
+    
+    <ng-container matColumnDef="tarih">
+      <th mat-header-cell *matHeaderCellDef>Tarih</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.tarih | date:'dd.MM.yyyy HH:mm'  }}
+      </td>
+    </ng-container>
+
+    
+    <ng-container matColumnDef="detay">
+      <th mat-header-cell *matHeaderCellDef>Detay</th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-stroked-button
+                color="primary"
+                (click)="detayGetir(element)">
+          {{ expandedElement === element ? 'Kapat' : 'Detaylar' }}
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let element; columns: displayedColumns;"></tr>
+
+    
+    <ng-container matColumnDef="expandedDetail">
+      <td mat-cell
+          *matCellDef="let element"
+          [attr.colspan]="displayedColumns.length">
+
+        <div *ngIf="expandedElement === element"
+             style="padding:16px; background:#fafafa; border-radius:8px;">
+
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0;">Genel Bilgiler</h3>
+           <div>
+  <strong>Ekleyen:</strong> {{ element.ekleyen || '-' }}
+</div>
+
+            <button mat-raised-button
+                    color="primary"
+                    (click)="guncelleDialogAc(element)">
+              Güncelle
+            </button>
+
+            <button mat-stroked-button
+        color="accent"
+        style="margin-left:8px;"
+        (click)="gecmisDialogAc(element)">
+      Güncelleme Geçmişi
+</button>
+
+          </div>
+       
+       <div style="margin-top:12px;">
+
+  <div>
+    <strong>TC:</strong> {{ element.kimlikNumarasi || '-' }}
+  </div>
+
+  <div>
+    <strong>Cinsiyet:</strong> {{ element.cinsiyet || '-' }}
+  </div>
+
+  <div>
+    <strong>Çalıştığı Yer:</strong> {{ element.calistigiYer || '-' }}
+   
+  </div>
+
+  <div>
+    <strong>Not:</strong> {{ element.not || '-' }}
+  </div>
+
+</div>
+
+      
+<hr>
+
+<div>
+  <strong>Adresler</strong>
+
+  
+
+  <div *ngIf="element.adresler?.length; else noAdres">
+    <div *ngFor="let a of element.adresler">
+      • {{ a.adres }}
+    </div>
+  </div>
+
+  <ng-template #noAdres>-</ng-template>
+</div>
+
+     <div style="margin-top:12px;">
+  <strong>Telefonlar</strong>
+
+  
+
+  <div *ngIf="element.telefon?.length; else noTel">
+    <div *ngFor="let t of element.telefon">
+      • {{ t.numara }}
+    </div>
+  </div>
+
+  <ng-template #noTel>-</ng-template>
+</div>
+
+
+
+    <div style="margin-top:12px;">
+  <strong>Mailler</strong>
+
+
+  <div *ngIf="element.mail?.length; else noMail">
+    <div *ngFor="let m of element.mail">
+      • {{ m.email }}
+    </div>
+  </div>
+
+  <ng-template #noMail>-</ng-template>
+</div>
+
+
+        </div>
+<div style="display:flex; justify-content:space-between; align-items:center;">
+
+  <button mat-raised-button
+          color="accent"
+          (click)="iletisimFormAc(element)">
+    İletişim Ekle
+  </button>
+
+  <button mat-stroked-button
+          color="primary"
+          (click)="iletisimGecmisiGit(element)">
+    İletişim Geçmişi
+  </button>
+
+</div>
+
+<div *ngIf="iletisimAcikMusteriId === element.id"
+     style="margin-top:16px; padding:16px; background:#f0f0f0; border-radius:8px;">
+
+  <form [formGroup]="iletisimForm">
+
+  <ng-container *ngFor="let d of dropdownlar">
+
+    <mat-form-field appearance="outline" style="width:100%; margin-top:12px;">
+      <mat-label>{{ d.ad }}</mat-label>
+
+      <mat-select [formControlName]="d.key">
+        <mat-option *ngFor="let s of d.secenekler" [value]="s.ad">
+          {{ s.ad }}
+        </mat-option>
+      </mat-select>
+
+    </mat-form-field>
+
+  </ng-container>
+
+  <mat-form-field appearance="outline" style="width:100%; margin-top:12px;">
+    <mat-label>Not</mat-label>
+    <textarea matInput rows="3" formControlName="not"></textarea>
+  </mat-form-field>
+
+  <button mat-raised-button
+          color="primary"
+          (click)="iletisimKaydet(element)"
+          [disabled]="iletisimForm.invalid">
+    Kaydet
+  </button>
+
+</form>
+</div>
+
+   
+
+      </td>
+
+      
+      
+    </ng-container>
+
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']"></tr>
+
+  </table>
+  <div *ngIf="!loading && musteriler.length > 0"
+     style="margin-top:16px; display:flex; justify-content:center; gap:10px;">
+
+  <button mat-stroked-button
+          (click)="oncekiSayfa()"
+          [disabled]="page === 1">
+    ◀ Önceki
+  </button>
+
+  <span>Sayfa {{ page }}</span>
+
+  <button mat-stroked-button
+        (click)="sonrakiSayfa()"
+        [disabled]="page >= toplamSayfa">
+  Sonraki ▶
+</button>
+
+
+</div>
+
+
+</mat-card>
