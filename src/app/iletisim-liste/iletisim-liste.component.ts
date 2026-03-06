@@ -7,11 +7,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
+import { MatDialogModule, MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import { MusteriService } from '../core/services/musteri.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { IletisimIslemGecmisiComponent } from '../iletisim-islem-gecmisi/iletisim-islem-gecmisi.component';
+import { AtananCaseDialogComponent } from '../atanan-case-dialog/atanan-case-dialog.component';
+import { CaseAtaDialogComponent } from '../case-ata-dialog/case-ata-dialog.component';
 
 @Component({
   selector: 'app-iletisim-liste',
@@ -24,7 +28,10 @@ import { IletisimIslemGecmisiComponent } from '../iletisim-islem-gecmisi/iletisi
     MatButtonModule,
     MatInputModule,
     FormsModule,
-    MatTableModule
+    MatTableModule,
+    MatDialogModule,
+    MatIconModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './iletisim-liste.component.html',
   styleUrls: ['./iletisim-liste.component.css']
@@ -32,24 +39,21 @@ import { IletisimIslemGecmisiComponent } from '../iletisim-islem-gecmisi/iletisi
 export class IletisimListeComponent implements OnInit {
 
   iletisimler: any[] = [];
-  seciliTur: string = '';
-  seciliKategori: string = '';
-
- displayedColumns: string[] = [
-  'musteri',
-  'notBtn',
-  'tarih',
-  'islem'
-];
+  // Header row'da expandedDetail OLMAMALI — sadece data ve detail row'da olacak
+  displayedColumns: string[] = ['musteri', 'notBtn', 'tarih', 'islem'];
+  displayedColumnsWithExpand: string[] = [...this.displayedColumns, 'expandedDetail'];
   expandedElement: any | null = null;
 
   page = 1;
   totalCount = 0;
   pageSize = 20;
-  musteriId: number | null = null;
-  isDialog = false;
   loading = false;
   error: string | null = null;
+
+  yeniIslemNot: any = {};
+  islemYukleniyor: any = {};
+  dropdownMap: any = {};
+  objectKeys = Object.keys;
 
   constructor(
     private service: MusteriService,
@@ -59,61 +63,47 @@ export class IletisimListeComponent implements OnInit {
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
-  notAcKapat(row: any) {
-    this.expandedElement = this.expandedElement === row ? null : row;
-  }
-
   ngOnInit() {
-    if (this.data?.musteriId) {
-      this.musteriId = this.data.musteriId;
-      this.isDialog = true;
-    }
-
-    this.route.queryParams.subscribe(params => {
-      if (!this.isDialog && params['musteriId']) {
-        this.musteriId = params['musteriId'];
-      }
-      this.getir();
-      this.service.dropdownAll().subscribe(res => {
-  res.forEach((d:any) => {
-    this.dropdownMap[d.key] = d.ad;
-  });
-});
-
+    this.getir();
+    this.service.dropdownAll().subscribe(res => {
+      res.forEach((d: any) => {
+        this.dropdownMap[d.key] = d.ad;
+      });
     });
   }
-yeniIslemNot: any = {};
 
-islemEkle(i: any) {
-  const body = {
-    iletisimId: i.id,
-    not: this.yeniIslemNot[i.id]
-  };
-
-  this.service.iletisimIslemEkle(body)
-    .subscribe(() => {
-      this.yeniIslemNot[i.id] = '';
-      alert('İşlem eklendi');
-    });
-}
   getir() {
-    const params: any = { page: this.page };
-
-    if (this.seciliTur) params.tur = this.seciliTur;
-    if (this.seciliKategori) params.kategori = this.seciliKategori;
-    if (this.musteriId) params.musteriId = this.musteriId;
-
     this.loading = true;
     this.error = null;
-
-    this.service.iletisimListeGetir(params)
+    this.service.iletisimListeGetir({ page: this.page })
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (res) => {
           this.iletisimler = res?.data ?? [];
           this.totalCount = res?.totalCount ?? 0;
         },
-        error: () => this.error = "İletişim listesi alınamadı."
+        error: () => this.error = 'Liste alınamadı'
+      });
+  }
+
+  notAcKapat(row: any) {
+    this.expandedElement = this.expandedElement === row ? null : row;
+  }
+
+  islemEkle(i: any) {
+    const not = this.yeniIslemNot[i.id]?.trim();
+    if (!not) return;
+
+    const body = { iletisimId: i.id, not };
+    this.islemYukleniyor[i.id] = true;
+
+    this.service.iletisimIslemEkle(body)
+      .pipe(finalize(() => this.islemYukleniyor[i.id] = false))
+      .subscribe({
+        next: () => {
+          this.yeniIslemNot[i.id] = '';
+        },
+        error: () => alert('İşlem eklenemedi')
       });
   }
 
@@ -128,41 +118,30 @@ islemEkle(i: any) {
     });
   }
 
-  turDegisti() {
-    if (!this.isDialog) {
-      this.musteriId = null;
-      this.router.navigate([], { queryParams: {} });
-    }
-    this.page = 1;
-    this.getir();
+  caseAta(i: any) {
+    this.dialog.open(CaseAtaDialogComponent, {
+      width: '500px',
+      data: { iletisimId: i.id, musteriId: i.musteriId }
+    });
   }
 
-  kategoriDegisti() {
-    if (!this.isDialog) {
-      this.musteriId = null;
-      this.router.navigate([], { queryParams: {} });
-    }
-    this.page = 1;
-    this.getir();
+  atananCaseleriAc() {
+    this.dialog.open(AtananCaseDialogComponent, { width: '800px' });
   }
 
   oncekiSayfa() {
-    if (this.page > 1) {
-      this.page--;
-      this.getir();
-    }
+    if (this.page > 1) { this.page--; this.getir(); }
   }
 
   sonrakiSayfa() {
-    const toplamSayfa = Math.ceil(this.totalCount / this.pageSize);
-    if (this.page < toplamSayfa) {
-      this.page++;
-      this.getir();
-    }
+    if (this.page < this.toplamSayfa) { this.page++; this.getir(); }
   }
-objectKeys = Object.keys;
-dropdownMap: any = {};
+
   get toplamSayfa(): number {
     return Math.ceil(this.totalCount / this.pageSize);
+  }
+
+  alanlarBosMu(alanlar: any): boolean {
+    return !alanlar || this.objectKeys(alanlar).length === 0;
   }
 }

@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>Case Ata</h2>
+
+<mat-dialog-content [formGroup]="form">
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Kullanıcı Seç</mat-label>
+    <mat-select formControlName="atananId">
+      <mat-option *ngFor="let k of kullanicilar" [value]="k.id">
+        {{ k.ad }} {{ k.soyad }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Not</mat-label>
+    <textarea matInput formControlName="not"></textarea>
+  </mat-form-field>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()">İptal</button>
+  <button mat-raised-button color="primary" (click)="kaydet()">
+    Kaydet
+  </button>
+</mat-dialog-actions>

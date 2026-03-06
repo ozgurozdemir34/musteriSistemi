@@ -58,3 +58,31 @@ table {
 .mat-mdc-row:hover {
   background-color: #f9fafb;
 }
+
+/* styles.scss - global dosyaya ekle */
+
+.detay-satir {
+  height: 0 !important;
+  
+  td, td.mat-cell, td.mat-mdc-cell {
+    padding: 0 !important;
+    border-bottom: none !important;
+    border-bottom-width: 0 !important;
+  }
+  
+
+}
+
+.acik-satir {
+  td, td.mat-cell, td.mat-mdc-cell {
+    border-bottom: none !important;
+  }
+}
+
+tr.detay-satir td {
+  padding: 0 !important;
+  border: none !important;
+  height: 0 !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
+}

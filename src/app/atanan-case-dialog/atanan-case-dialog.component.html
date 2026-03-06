@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>Bana Atanan Case'ler</h2>
+
+<mat-dialog-content>
+
+  <p *ngIf="loading">Yükleniyor...</p>
+
+  <table mat-table
+         *ngIf="!loading"
+         [dataSource]="caseler"
+         class="mat-elevation-z2"
+         style="width:100%">
+
+    <ng-container matColumnDef="musteri">
+      <th mat-header-cell *matHeaderCellDef>Müşteri</th>
+      <td mat-cell *matCellDef="let c">{{ c.musteri }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="atayan">
+      <th mat-header-cell *matHeaderCellDef>Atayan</th>
+      <td mat-cell *matCellDef="let c">{{ c.atayan }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="not">
+      <th mat-header-cell *matHeaderCellDef>Not</th>
+      <td mat-cell *matCellDef="let c">{{ c.not }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="tarih">
+      <th mat-header-cell *matHeaderCellDef>Tarih</th>
+      <td mat-cell *matCellDef="let c">
+        {{ c.tarih | date:'dd.MM.yyyy HH:mm' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="islem">
+      <th mat-header-cell *matHeaderCellDef>İşlem</th>
+      <td mat-cell *matCellDef="let c">
+        <button mat-raised-button
+                color="primary"
+                (click)="tamamla(c.id)">
+          Tamamla
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="['musteri','atayan','not','tarih','islem']"></tr>
+    <tr mat-row *matRowDef="let row; columns: ['musteri','atayan','not','tarih','islem']"></tr>
+
+  </table>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()">Kapat</button>
+</mat-dialog-actions>

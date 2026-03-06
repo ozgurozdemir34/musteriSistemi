@@ -18,6 +18,7 @@ import { NgxMaskDirective } from 'ngx-mask';
 import { MusteriGecmisDialogComponent } from '../../../musteri-gecmis-dialog/musteri-gecmis-dialog.component';
 import { AuthService } from '../../../auth.service';
 import { Router } from '@angular/router';
+import { AtananCaseDialogComponent } from '../../../atanan-case-dialog/atanan-case-dialog.component';
 
 @Component({
   selector: 'app-musteri-liste',
@@ -193,6 +194,12 @@ iletisimKaydet(musteri: any) {
 
 cikis() {
   this.auth.logout();
+}
+
+atananCaseleriAc() {
+  this.dialog.open(AtananCaseDialogComponent, {
+    width: '800px'
+  });
 }
 
 iletisimDialogAc(musteri: any) {

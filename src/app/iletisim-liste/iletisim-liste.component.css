@@ -1,52 +1,222 @@
-/* MatTable çizgileri tam genişlikte düzgün dursun */
-table.mat-mdc-table {
-  width: 100%;
-  border-collapse: collapse;
+.iletisim-card {
+  margin: 16px;
+  padding: 20px;
 }
 
-/* Satır çizgisi */
-.mat-mdc-row, .mat-mdc-header-row {
-  border-bottom: 1px solid rgba(0,0,0,0.12);
-}
-
-/* Hücre çizgisi (MDC bazen satır borderını tam göstermeyebiliyor) */
-.mat-mdc-cell, .mat-mdc-header-cell {
-  border-bottom: 1px solid rgba(0,0,0,0.12);
-}
-
-/* Butonlar tek satırda kalsın, düzgün hizalansın */
-.actions {
+/* HEADER */
+.card-header {
   display: flex;
-  gap: 10px;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
-  white-space: nowrap;
-}
-.not-box {
-  margin-top: 8px;
-  padding: 10px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  white-space: pre-wrap;
-  line-height: 1.5;
-  max-width: 400px;
+  margin-bottom: 16px;
 }
 
-/* Expanded satırın hücresi */
+.baslik {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+/* DURUM */
+.durum-satiri {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+  color: #666;
+}
+
+.hata-mesaji {
+  color: #e53935;
+  margin: 12px 0;
+}
+
+/* TABLO */
+.iletisim-tablo {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.musteri-adi {
+  font-weight: 500;
+}
+
+.islemyapan {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.tarih-kucuk {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.islem-hucre {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.islem-hucre button {
+  font-size: 0.8rem;
+}
+
+.detay-btn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.85rem;
+}
+
+/* ANA SATIR */
+.ana-satir {
+  transition: background 0.2s;
+}
+
+.ana-satir:hover {
+  background: #f5f5f5;
+}
+
+.acik-satir > td.mat-cell {
+  border-bottom: none !important;
+}
+
+/* Detay satırının kendi yüksekliği olmamalı */
+/* Detay satırının kendi yüksekliği olmamalı */
+.detay-satir::after {
+  display: none !important;
+}
+
+/* Material'ın varsayılan satır border'ını da kapat */
+.detay-satir > td.mat-cell {
+  border-bottom-width: 0 !important;
+}
+
 .expanded-cell {
   padding: 0 !important;
-  border-bottom: 1px solid rgba(0,0,0,0.12);
+  border-bottom: none !important;
 }
 
-/* Açılan kutu */
-.expanded-box {
-  padding: 12px 16px;
-  background: #f7f7f7;
-  white-space: pre-wrap;
-  line-height: 1.5;
+.expanded-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
 }
 
-/* Expanded row gereksiz yükseklik yapmasın */
-.expanded-row .mat-mdc-cell {
-  padding: 0 !important;
+.expanded-content.expanded-open {
+  max-height: 600px;
+}
+
+/* Kapalıyken inner padding sıfır olmalı */
+.expanded-inner {
+  padding: 0;
+  transition: padding 0.35s ease;
+}
+
+.expanded-content.expanded-open .expanded-inner {
+  padding: 16px 24px 20px;
+  background: #fafafa;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 2px solid #1976d2;
+}
+
+/* DETAY BÖLÜM */
+.detay-bolum {
+  margin-bottom: 16px;
+}
+
+.detay-baslik {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1976d2;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ALANLAR */
+.alan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px 16px;
+}
+
+.alan-satir {
+  display: flex;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.alan-key {
+  color: #555;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.alan-value {
+  color: #222;
+}
+
+/* NOT */
+.not-metin {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+  background: #fff;
+  border-left: 3px solid #1976d2;
+  padding: 8px 12px;
+  border-radius: 2px;
+}
+
+/* İŞLEM EKLE */
+.islem-ekle-satir {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.islem-input {
+  flex: 1;
+}
+
+.islem-ekle-satir button {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* BOŞ DURUM */
+.bos-durum {
+  text-align: center;
+  padding: 40px 0;
+  color: #aaa;
+}
+
+.bos-durum mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+}
+
+/* SAYFALAMA */
+.sayfalama {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.sayfa-bilgi {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.alan-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }

@@ -66,4 +66,22 @@ dropdownAll() {
   dropdownGet(key: string) {
     return this.http.get<any>(`${this.baseUrl}/dropdown/${key}`);
   }
+
+  caseOlustur(data: any) {
+  return this.http.post(`${this.baseUrl}/case`, data);
+}
+
+
+caseTamamla(id: number) {
+  return this.http.post(`${this.baseUrl}/case/tamamla/${id}`, {});
+}
+
+atananCaseGetir() {
+  return this.http.get<any[]>(`${this.baseUrl}/case/atananlar`);
+}
+
+kullanicilariGetir() {
+  return this.http.get<any[]>(`${this.baseUrl}/kullanici`);
+}
+
 }

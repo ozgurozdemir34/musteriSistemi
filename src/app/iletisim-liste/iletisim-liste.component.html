@@ -1,115 +1,179 @@
-<mat-card>
+<mat-card class="iletisim-card">
 
-  <h2>İletişim Kayıtları</h2>
+  <!-- HEADER -->
+  <div class="card-header">
+    <h2 class="baslik">İletişim Kayıtları</h2>
+    <button mat-raised-button color="accent" (click)="atananCaseleriAc()">
+      <mat-icon>assignment</mat-icon>
+      Atanan Case'ler
+    </button>
+  </div>
 
-  <p *ngIf="loading" style="margin-top:16px;">Yükleniyor...</p>
-  <p *ngIf="error" style="color:red; margin-top:16px;">{{ error }}</p>
+  <!-- LOADING / ERROR -->
+  <div *ngIf="loading" class="durum-satiri">
+    <mat-spinner diameter="28"></mat-spinner>
+    <span>Yükleniyor...</span>
+  </div>
+  <p *ngIf="error" class="hata-mesaji">{{ error }}</p>
 
-  <table mat-table
-         [dataSource]="iletisimler"
-         multiTemplateDataRows
-         class="mat-elevation-z2"
-         style="margin-top:16px; width:100%;">
+  <!-- TABLO -->
+  <table
+    mat-table
+    [dataSource]="iletisimler"
+    multiTemplateDataRows
+    class="mat-elevation-z2 iletisim-tablo"
+  >
 
+    <!-- Müşteri -->
     <ng-container matColumnDef="musteri">
       <th mat-header-cell *matHeaderCellDef>Müşteri</th>
-      <td mat-cell *matCellDef="let i">{{ i.musteri }}</td>
+      <td mat-cell *matCellDef="let i">
+        <span class="musteri-adi">{{ i.musteri }}</span>
+      </td>
     </ng-container>
 
+    <!-- Detay butonu -->
     <ng-container matColumnDef="notBtn">
       <th mat-header-cell *matHeaderCellDef>Detay</th>
       <td mat-cell *matCellDef="let i">
-        <button mat-stroked-button color="primary" (click)="notAcKapat(i)">
+        <button
+          mat-stroked-button
+          color="primary"
+          class="detay-btn"
+          (click)="notAcKapat(i)"
+        >
+          <mat-icon>{{ expandedElement === i ? 'expand_less' : 'expand_more' }}</mat-icon>
           {{ expandedElement === i ? 'Kapat' : 'Detay' }}
         </button>
       </td>
     </ng-container>
 
+    <!-- Ekleyen & Tarih -->
     <ng-container matColumnDef="tarih">
-      <th mat-header-cell *matHeaderCellDef>Ekleyen ve Tarih</th>
+      <th mat-header-cell *matHeaderCellDef>Ekleyen / Tarih</th>
       <td mat-cell *matCellDef="let i">
-        {{ i.islemYapan }} - {{ i.tarih | date:'dd.MM.yyyy HH:mm' }}
+        <span class="islemyapan">{{ i.islemYapan }}</span>
+        <br />
+        <span class="tarih-kucuk">{{ i.tarih | date:'dd.MM.yyyy HH:mm' }}</span>
       </td>
     </ng-container>
 
+    <!-- İşlem butonları -->
     <ng-container matColumnDef="islem">
       <th mat-header-cell *matHeaderCellDef>İşlem</th>
-      <td mat-cell *matCellDef="let i">
-        <button mat-stroked-button color="primary"
-                (click)="musteriyeGit(i.musteriId)">
-          Müşteri
+      <td mat-cell *matCellDef="let i" class="islem-hucre">
+        <button mat-stroked-button color="primary" (click)="musteriyeGit(i.musteriId)">
+          <mat-icon>person</mat-icon> Müşteri
         </button>
-
-        <button mat-stroked-button color="primary"
-                (click)="islemGecmisiDialogAc(i)">
-          İşlem Geçmişi
+        <button mat-stroked-button color="primary" (click)="islemGecmisiDialogAc(i)">
+          <mat-icon>history</mat-icon> İşlem Geçmişi
+        </button>
+        <button mat-stroked-button color="warn" (click)="caseAta(i)">
+          <mat-icon>assignment_ind</mat-icon> Case Ata
         </button>
       </td>
     </ng-container>
 
-    <!-- EXPANDED -->
+    <!-- ⭐ GENİŞLETİLMİŞ DETAY SATIRI -->
     <ng-container matColumnDef="expandedDetail">
-  <td mat-cell *matCellDef="let i"
-      [attr.colspan]="displayedColumns.length">
+      <td
+        mat-cell
+        *matCellDef="let i"
+        [attr.colspan]="displayedColumns.length"
+        class="expanded-cell"
+        style="padding: 0; border: none;"
+      >
+        <div
+          class="expanded-content"
+          [class.expanded-open]="expandedElement === i"
+        >
+          <div class="expanded-inner" *ngIf="expandedElement === i">
 
-    <div *ngIf="expandedElement === i">
+            <!-- Alanlar -->
+            <div class="detay-bolum" *ngIf="!alanlarBosMu(i.alanlar)">
+              <h4 class="detay-baslik">Alanlar</h4>
+              <div class="alan-grid">
+                <div class="alan-satir" *ngFor="let key of objectKeys(i.alanlar)">
+                  <span class="alan-key">{{ dropdownMap[key] || key }}</span>
+                  <br>
+                  <span class="alan-value">{{ i.alanlar[key] }}</span>
+                </div>
+              </div>
+            </div>
 
-      <!-- JSON alanlar -->
-      <div *ngFor="let key of objectKeys(i.alanlar)">
-        <strong>{{ dropdownMap[key] || key }}:</strong> {{ i.alanlar[key] }}
-      </div>
+            <!-- Not -->
+            <div class="detay-bolum" *ngIf="i.not">
+              <h4 class="detay-baslik">Not</h4>
+              <p class="not-metin">{{ i.not }}</p>
+            </div>
 
-      <hr>
+            <!-- Yeni işlem ekle -->
+            <div class="detay-bolum islem-ekle-bolum">
+              <h4 class="detay-baslik">Yeni İşlem Ekle</h4>
+              <div class="islem-ekle-satir">
+                <mat-form-field appearance="outline" class="islem-input">
+                  <mat-label>İşlem notu</mat-label>
+                  <input
+                    matInput
+                    [(ngModel)]="yeniIslemNot[i.id]"
+                    placeholder="Not giriniz..."
+                    (keydown.enter)="islemEkle(i)"
+                  />
+                </mat-form-field>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  [disabled]="!yeniIslemNot[i.id]?.trim() || islemYukleniyor[i.id]"
+                  (click)="islemEkle(i)"
+                >
+                  <mat-icon *ngIf="!islemYukleniyor[i.id]">send</mat-icon>
+                  <mat-spinner *ngIf="islemYukleniyor[i.id]" diameter="18"></mat-spinner>
+                  Ekle
+                </button>
+              </div>
+            </div>
 
-      <!-- iletişim not -->
-      <div>
-        <strong>Not:</strong> {{ i.not || '-' }}
-      </div>
+          </div>
+        </div>
+      </td>
+    </ng-container>
 
-      <hr>
-
-      <!-- ⭐ işlem ekleme -->
-      <mat-form-field appearance="outline" style="width:100%; margin-top:8px;">
-        <mat-label>Yeni işlem notu</mat-label>
-        <textarea matInput
-                  [(ngModel)]="yeniIslemNot[i.id]"
-                  rows="2">
-        </textarea>
-      </mat-form-field>
-
-      <button mat-raised-button
-              color="primary"
-              (click)="islemEkle(i)"
-              [disabled]="!yeniIslemNot[i.id]">
-        İşlem ekle
-      </button>
-
-    </div>
-
-  </td>
-</ng-container>
-
+    <!-- SATIRLAR -->
+    <!-- Header -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
 
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <!-- Ana veri satırı — expandedDetail YOK -->
+    <tr
+      mat-row
+      *matRowDef="let row; columns: displayedColumns;"
+      class="ana-satir"
+      [class.acik-satir]="expandedElement === row"
+    ></tr>
 
-    <tr mat-row *matRowDef="let row; columns: ['expandedDetail'];"></tr>
+    <!-- Genişletilmiş detay satırı -->
+    <tr
+      mat-row
+      *matRowDef="let row; columns: ['expandedDetail']"
+      class="detay-satir"
+    ></tr>
 
   </table>
 
-  <div *ngIf="!loading && iletisimler.length > 0"
-       style="margin-top:16px; display:flex; justify-content:center; gap:10px;">
+  <!-- BOŞ DURUM -->
+  <div *ngIf="!loading && iletisimler.length === 0 && !error" class="bos-durum">
+    <mat-icon>inbox</mat-icon>
+    <p>Kayıt bulunamadı.</p>
+  </div>
 
+  <!-- SAYFALAMA -->
+  <div *ngIf="!loading && iletisimler.length > 0" class="sayfalama">
     <button mat-stroked-button (click)="oncekiSayfa()" [disabled]="page === 1">
-      ◀ Önceki
+      <mat-icon>chevron_left</mat-icon> Önceki
     </button>
-
-    <span>Sayfa {{ page }} / {{ toplamSayfa }}</span>
-
+    <span class="sayfa-bilgi">Sayfa {{ page }} / {{ toplamSayfa }}</span>
     <button mat-stroked-button (click)="sonrakiSayfa()" [disabled]="page >= toplamSayfa">
-      Sonraki ▶
+      Sonraki <mat-icon>chevron_right</mat-icon>
     </button>
-
   </div>
 
 </mat-card>
