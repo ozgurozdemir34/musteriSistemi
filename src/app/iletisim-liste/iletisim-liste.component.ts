@@ -40,7 +40,7 @@ export class IletisimListeComponent implements OnInit {
 
   iletisimler: any[] = [];
   // Header row'da expandedDetail OLMAMALI — sadece data ve detail row'da olacak
-  displayedColumns: string[] = ['musteri', 'notBtn', 'tarih', 'islem'];
+  displayedColumns: string[] = ['musteri', 'notBtn', 'tarih'];
   displayedColumnsWithExpand: string[] = [...this.displayedColumns, 'expandedDetail'];
   expandedElement: any | null = null;
 

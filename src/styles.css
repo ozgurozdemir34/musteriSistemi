@@ -86,3 +86,9 @@ tr.detay-satir td {
   line-height: 0 !important;
   font-size: 0 !important;
 }
+
+.custom-dialog .mat-mdc-dialog-container {
+  padding: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}

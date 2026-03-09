@@ -1,0 +1,178 @@
+/* ===== WRAPPER ===== */
+.dialog-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ===== HEADER ===== */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #1a1f2e;
+  border-radius: 4px 4px 0 0;
+  flex-shrink: 0;
+}
+
+.dialog-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.dialog-sub {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.kapat-btn {
+  color: #94a3b8 !important;
+}
+
+.kapat-btn:hover {
+  color: #f87171 !important;
+}
+
+/* ===== CONTENT ===== */
+.dialog-content {
+  padding: 20px 24px !important;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ===== SECTION TITLE ===== */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #1d4ed8;
+  margin: 20px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section-title:first-of-type {
+  margin-top: 0;
+}
+
+.section-title mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== FORM ===== */
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.ff {
+  flex: 1;
+}
+
+.ff-full {
+  width: 100%;
+}
+
+/* ===== ARRAY ROWS ===== */
+.array-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.array-row .ff-full {
+  flex: 1;
+}
+
+.sil-btn {
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.ekle-satir-btn {
+  font-size: 0.82rem !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+  border-radius: 6px !important;
+  margin-bottom: 4px;
+}
+
+/* ===== FOOTER ===== */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.iptal-btn {
+  color: #64748b !important;
+  border-radius: 8px !important;
+}
+
+.kaydet-btn {
+  background: #1d4ed8 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kaydet-btn:disabled {
+  background: #94a3b8 !important;
+}
+
+/* ===== GÜNCELLE DIALOG EKSTRASİ ===== */
+.dialog-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gecmis-btn {
+  color: #f59e0b !important;
+  border-color: #f59e0b !important;
+  font-size: 0.82rem !important;
+  border-radius: 6px !important;
+}
+
+.gecmis-btn:hover {
+  background: rgba(245,158,11,0.1) !important;
+}

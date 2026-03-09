@@ -1,0 +1,166 @@
+<div class="dialog-wrapper">
+
+  <!-- HEADER -->
+  <div class="dialog-header">
+    <div class="dialog-header-left">
+      <div class="logo-mark">M</div>
+      <div>
+        <h2 class="dialog-title">Yeni Müşteri</h2>
+        <p class="dialog-sub">Müşteri bilgilerini doldurun</p>
+      </div>
+    </div>
+    <button mat-icon-button class="kapat-btn" (click)="dialogRef.close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="form">
+
+      <!-- Temel Bilgiler -->
+      <div class="section-title">
+        <mat-icon>person</mat-icon> Temel Bilgiler
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="ff">
+          <mat-label>Ad</mat-label>
+          <input matInput formControlName="ad">
+          <mat-error *ngIf="form.get('ad')?.invalid">Zorunlu alan</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="ff">
+          <mat-label>Soyad</mat-label>
+          <input matInput formControlName="soyad">
+          <mat-error *ngIf="form.get('soyad')?.invalid">Zorunlu alan</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="ff">
+          <mat-label>TC Kimlik Numarası</mat-label>
+          <mat-icon matPrefix>badge</mat-icon>
+          <input matInput maxlength="11" inputmode="numeric"
+                 (keypress)="onlyNumber($event)" formControlName="kimlikNumarasi">
+          <mat-error *ngIf="form.get('kimlikNumarasi')?.hasError('required')">Zorunlu</mat-error>
+          <mat-error *ngIf="form.get('kimlikNumarasi')?.hasError('minlength')">11 haneli olmalıdır</mat-error>
+          <mat-error *ngIf="form.get('kimlikNumarasi')?.hasError('pattern')">Sadece sayı giriniz</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="ff">
+          <mat-label>Çalıştığı Yer</mat-label>
+          <mat-icon matPrefix>business</mat-icon>
+          <input matInput formControlName="calistigiYer">
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="ff">
+          <mat-label>Cinsiyet</mat-label>
+          <mat-icon matPrefix>wc</mat-icon>
+          <mat-select formControlName="cinsiyet">
+            <mat-option value="Erkek">Erkek</mat-option>
+            <mat-option value="Kadın">Kadın</mat-option>
+            <mat-option value="Diğer">Diğer</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="ff">
+          <mat-label>Durum</mat-label>
+          <mat-icon matPrefix>toggle_on</mat-icon>
+          <mat-select formControlName="durum">
+            <mat-option value="Aktif">Aktif</mat-option>
+            <mat-option value="Pasif">Pasif</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="ff-full">
+        <mat-label>Not</mat-label>
+        <mat-icon matPrefix>notes</mat-icon>
+        <textarea matInput rows="2" formControlName="not"></textarea>
+      </mat-form-field>
+
+      <!-- Adresler -->
+      <div class="section-title">
+        <mat-icon>location_on</mat-icon> Adresler
+      </div>
+
+      <div formArrayName="adresler">
+        <div *ngFor="let a of adresArray.controls; let i=index"
+             [formGroupName]="i" class="array-row">
+          <mat-form-field appearance="outline" class="ff-full">
+            <mat-label>Adres {{ i + 1 }}</mat-label>
+            <input matInput formControlName="adres">
+          </mat-form-field>
+          <button mat-icon-button color="warn" type="button" class="sil-btn" (click)="adresSil(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+      <button mat-stroked-button type="button" class="ekle-satir-btn" (click)="adresEkle()">
+        <mat-icon>add</mat-icon> Adres Ekle
+      </button>
+
+      <!-- Telefonlar -->
+      <div class="section-title">
+        <mat-icon>phone</mat-icon> Telefonlar
+      </div>
+
+      <div formArrayName="telefon">
+        <div *ngFor="let t of telefonArray.controls; let i=index"
+             [formGroupName]="i" class="array-row">
+          <mat-form-field appearance="outline" class="ff-full">
+            <mat-label>Telefon {{ i + 1 }}</mat-label>
+            <input matInput mask="(000) 000 00 00" formControlName="numara">
+            <mat-error *ngIf="t.get('numara')?.hasError('required')">Zorunlu</mat-error>
+          </mat-form-field>
+          <button mat-icon-button color="warn" type="button" class="sil-btn" (click)="telefonSil(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+      <button mat-stroked-button type="button" class="ekle-satir-btn" (click)="telefonEkle()">
+        <mat-icon>add</mat-icon> Telefon Ekle
+      </button>
+
+      <!-- Mailler -->
+      <div class="section-title">
+        <mat-icon>email</mat-icon> E-posta Adresleri
+      </div>
+
+      <div formArrayName="mail">
+        <div *ngFor="let m of mailArray.controls; let i=index"
+             [formGroupName]="i" class="array-row">
+          <mat-form-field appearance="outline" class="ff-full">
+            <mat-label>E-posta {{ i + 1 }}</mat-label>
+            <input matInput type="email" formControlName="email">
+            <mat-error *ngIf="m.get('email')?.hasError('required')">Zorunlu</mat-error>
+            <mat-error *ngIf="m.get('email')?.hasError('email')">Geçerli email giriniz</mat-error>
+          </mat-form-field>
+          <button mat-icon-button color="warn" type="button" class="sil-btn" (click)="mailSil(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+      <button mat-stroked-button type="button" class="ekle-satir-btn" (click)="mailEkle()">
+        <mat-icon>add</mat-icon> Mail Ekle
+      </button>
+
+    </form>
+  </mat-dialog-content>
+
+  <!-- FOOTER -->
+  <div class="dialog-footer">
+    <button mat-stroked-button class="iptal-btn" (click)="dialogRef.close()">
+      İptal
+    </button>
+    <button mat-flat-button class="kaydet-btn"
+            [disabled]="form.invalid"
+            (click)="kaydet()">
+      <mat-icon>save</mat-icon> Kaydet
+    </button>
+  </div>
+
+</div>

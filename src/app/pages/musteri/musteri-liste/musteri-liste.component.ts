@@ -19,6 +19,8 @@ import { MusteriGecmisDialogComponent } from '../../../musteri-gecmis-dialog/mus
 import { AuthService } from '../../../auth.service';
 import { Router } from '@angular/router';
 import { AtananCaseDialogComponent } from '../../../atanan-case-dialog/atanan-case-dialog.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-musteri-liste',
@@ -33,7 +35,9 @@ import { AtananCaseDialogComponent } from '../../../atanan-case-dialog/atanan-ca
     MatInputModule,
     MatSelectModule,
     ReactiveFormsModule,
-    NgxMaskDirective
+    NgxMaskDirective,
+    MatIconModule,
+    MatProgressSpinner
   ],
    
   templateUrl: './musteri-liste.component.html',
@@ -83,7 +87,7 @@ dropdownlar: any[] = [];
     ad: [''],
     soyad: [''],
     telefon: [''],
-    durum: ['Aktif', Validators.required],
+    durum: [],
     mail: ['']
   });
 this.iletisimForm = this.fb.group({
@@ -287,7 +291,7 @@ gecmisDialogAc(musteri: any) {
     this.aramaForm.reset({
       ad: '',
       soyad: '',
-      durum: 'Aktif',
+      durum: '',
       mail :''
     });
 
