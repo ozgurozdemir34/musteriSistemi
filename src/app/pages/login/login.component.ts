@@ -54,7 +54,7 @@ export class LoginComponent {
         if (user?.rol === 'Admin') {
           this.router.navigate(['/admin/kullanicilar']);
         } else {
-          this.router.navigate(['/musteri']);
+          this.router.navigate(['/anasayfa']);
         }
       },
       error: () => {

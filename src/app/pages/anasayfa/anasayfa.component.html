@@ -1,0 +1,53 @@
+<div class="anasayfa-wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="logo-mark">M</div>
+      <span class="app-title">Müşteri Sistemi</span>
+    </div>
+    <div class="top-bar-right">
+      <span class="hosgeldin">Merhaba, {{ kullaniciAdi }}</span>
+      <button mat-icon-button class="cikis-btn" (click)="cikis()" matTooltip="Çıkış">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div class="hero">
+      <h1 class="hero-title">Hoş Geldiniz</h1>
+      <p class="hero-sub">Ne yapmak istersiniz?</p>
+    </div>
+
+    <div class="kart-grid">
+
+      <div class="nav-kart" (click)="musteriyeGit()">
+        <div class="kart-ikon musteri-ikon">
+          <mat-icon>people</mat-icon>
+        </div>
+        <div class="kart-bilgi">
+          <h3>Müşteri Listesi</h3>
+          <p>Müşterileri ara, görüntüle ve yönet</p>
+        </div>
+        <mat-icon class="kart-ok">arrow_forward</mat-icon>
+      </div>
+
+      <div class="nav-kart" (click)="iletisimeGit()">
+        <div class="kart-ikon iletisim-ikon">
+          <mat-icon>forum</mat-icon>
+        </div>
+        <div class="kart-bilgi">
+          <h3>İletişim Listesi</h3>
+          <p>İletişim kayıtlarını görüntüle ve takip et</p>
+        </div>
+        <mat-icon class="kart-ok">arrow_forward</mat-icon>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

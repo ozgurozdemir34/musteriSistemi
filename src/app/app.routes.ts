@@ -5,6 +5,7 @@ import { IletisimListeComponent } from './iletisim-liste/iletisim-liste.componen
 import { loginKontrol } from './auth/login-kontrol.guard';
 import { AdminKullaniciComponent } from './pages/admin/admin-kullanici/admin-kullanici.component';
 import { adminGuard } from './auth/admin.guard';
+import { AnasayfaComponent } from './pages/anasayfa/anasayfa.component';
 
 
 export const routes: Routes = [
@@ -27,6 +28,8 @@ export const routes: Routes = [
   canActivate:[loginKontrol]
 },
 
+{ path: 'anasayfa', component: AnasayfaComponent, canActivate: [loginKontrol] },
+{ path: '', redirectTo: 'anasayfa', pathMatch: 'full' },
 
 {
   path: 'admin/kullanicilar',
