@@ -14,7 +14,7 @@ export interface PagedResponse<T> {
 export class MusteriService {
 
   private baseUrl = 'https://localhost:7213';
-
+  aramaState: any = null;
   constructor(private http: HttpClient) {}
 
   ara(params: any): Observable<PagedResponse<Musteri>> {
@@ -83,5 +83,7 @@ atananCaseGetir() {
 kullanicilariGetir() {
   return this.http.get<any[]>(`${this.baseUrl}/kullanici`);
 }
-
+musteriRaporGetir(musteriId: number) {
+  return this.http.get<any>(`${this.baseUrl}/rapor/musteri/${musteriId}`);
+}
 }

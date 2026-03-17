@@ -1,0 +1,58 @@
+<div class="dialog-wrapper">
+
+  <!-- HEADER -->
+  <div class="dialog-header">
+    <div class="dialog-header-left">
+      <div class="logo-mark">M</div>
+      <div>
+        <h2 class="dialog-title">İletişim Ekle</h2>
+        <p class="dialog-sub">{{ data.musteriAd }}</p>
+      </div>
+    </div>
+    <button mat-icon-button class="kapat-btn" (click)="dialogRef.close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="iletisimForm">
+
+      <div class="section-title">
+        <mat-icon>list_alt</mat-icon> Alanlar
+      </div>
+
+      <ng-container *ngFor="let d of dropdownlar">
+        <mat-form-field appearance="outline" class="ff-full">
+          <mat-label>{{ d.ad }}</mat-label>
+          <mat-select [formControlName]="d.key">
+            <mat-option *ngFor="let s of d.secenekler" [value]="s.ad">{{ s.ad }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </ng-container>
+
+      <div class="section-title">
+        <mat-icon>notes</mat-icon> Not
+      </div>
+
+      <mat-form-field appearance="outline" class="ff-full">
+        <mat-label>Not</mat-label>
+        <textarea matInput rows="3" formControlName="not"></textarea>
+      </mat-form-field>
+
+    </form>
+  </mat-dialog-content>
+
+  <!-- FOOTER -->
+  <div class="dialog-footer">
+    <button mat-stroked-button class="iptal-btn" (click)="dialogRef.close()">
+      İptal
+    </button>
+    <button mat-flat-button class="kaydet-btn"
+            [disabled]="iletisimForm.invalid"
+            (click)="kaydet()">
+      <mat-icon>save</mat-icon> Kaydet
+    </button>
+  </div>
+
+</div>

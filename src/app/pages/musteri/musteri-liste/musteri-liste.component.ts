@@ -21,6 +21,8 @@ import { Router } from '@angular/router';
 import { AtananCaseDialogComponent } from '../../../atanan-case-dialog/atanan-case-dialog.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { IletisimEkleDialogComponent } from '../../../iletisim-ekle-dialog/iletisim-ekle-dialog.component';
+import { RaporService } from '../../../core/services/rapor.service';
 
 @Component({
   selector: 'app-musteri-liste',
@@ -77,7 +79,8 @@ yollar: any[] = [];
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private auth: AuthService,
-     private router: Router
+     private router: Router,
+     private raporService: RaporService
 
   ) {}
 dropdownlar: any[] = [];
@@ -90,6 +93,14 @@ dropdownlar: any[] = [];
     durum: [],
     mail: ['']
   });
+
+  const state = this.musteriService.aramaState;
+  if (state) {
+    this.aramaForm.patchValue(state.params);
+    this.page = state.page;
+    this.ara();
+  }
+
 this.iletisimForm = this.fb.group({
   tur: ['', Validators.required],
   kategori: ['', Validators.required], 
@@ -157,12 +168,26 @@ iletisimGecmisiGit(musteri: any) {
     queryParams: { musteriId: musteri.id }
   });
 }
-
+raporIndir(musteri: any) {
+  this.musteriService.musteriRaporGetir(musteri.id).subscribe({
+    next: (data) => this.raporService.musteriExcel(data),
+    error: () => alert('Rapor alınamadı')
+  });
+}
 iletisimFormAc(musteri: any) {
-  this.iletisimAcikMusteriId =
-    this.iletisimAcikMusteriId === musteri.id ? null : musteri.id;
+  const ref = this.dialog.open(IletisimEkleDialogComponent, {
+    width: '520px',
+    maxHeight: '90vh',
+    panelClass: 'custom-dialog',
+    data: {
+      musteriId: musteri.id,
+      musteriAd: musteri.ad + ' ' + musteri.soyad
+    }
+  });
 
-  this.iletisimForm.reset();
+  ref.afterClosed().subscribe(result => {
+    if (result) alert('İletişim eklendi.');
+  });
 }
 
 iletisimKaydet(musteri: any) {
@@ -260,7 +285,10 @@ totalCount = 0;
   }
 
   this.loading = true;
-
+ this.musteriService.aramaState = {
+    params: this.aramaForm.value,
+    page: this.page
+  };
   this.musteriService.ara(params)
     .pipe(finalize(() => this.loading = false))
     .subscribe({

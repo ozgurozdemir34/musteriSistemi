@@ -173,6 +173,9 @@
                   <button mat-stroked-button class="exp-btn" (click)="iletisimGecmisiGit(e)">
                     <mat-icon>forum</mat-icon> İletişim Geçmişi
                   </button>
+                  <button mat-stroked-button class="exp-btn" (click)="raporIndir(e)">
+  <mat-icon>download</mat-icon> Excel Rapor
+</button>
                 </div>
               </div>
 
@@ -225,29 +228,7 @@
                 </div>
               </div>
 
-              <!-- İletişim formu -->
-              <div *ngIf="iletisimAcikMusteriId === e.id" class="iletisim-form-wrap">
-                <h4 class="iletisim-form-baslik"><mat-icon>add_comment</mat-icon> Yeni İletişim</h4>
-                <form [formGroup]="iletisimForm">
-                  <ng-container *ngFor="let d of dropdownlar">
-                    <mat-form-field appearance="outline" class="iletisim-ff">
-                      <mat-label>{{ d.ad }}</mat-label>
-                      <mat-select [formControlName]="d.key">
-                        <mat-option *ngFor="let s of d.secenekler" [value]="s.ad">{{ s.ad }}</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </ng-container>
-
-                  <mat-form-field appearance="outline" class="iletisim-ff">
-                    <mat-label>Not</mat-label>
-                    <textarea matInput rows="3" formControlName="not"></textarea>
-                  </mat-form-field>
-
-                  <button mat-flat-button class="kaydet-btn" (click)="iletisimKaydet(e)" [disabled]="iletisimForm.invalid">
-                    <mat-icon>save</mat-icon> Kaydet
-                  </button>
-                </form>
-              </div>
+             
 
             </div>
           </div>

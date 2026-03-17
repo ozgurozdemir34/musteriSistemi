@@ -495,3 +495,8 @@
   .arama-card, .liste-card { margin: 12px; }
   .exp-topbar { flex-direction: column; align-items: flex-start; }
 }
+
+.rapor-btn {
+  color: #16a34a !important;
+  border-color: #bbf7d0 !important;
+}
