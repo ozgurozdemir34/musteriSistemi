@@ -8,7 +8,6 @@ export class RaporService {
   constructor(private musteriService: MusteriService) {}
 
   musteriExcel(data: any) {
-    // Önce dropdownları çek, sonra excel oluştur
     this.musteriService.dropdownAll().subscribe(dropdownlar => {
       const dropdownMap: any = {};
       dropdownlar.forEach((d: any) => {
@@ -22,22 +21,44 @@ export class RaporService {
     const wb = XLSX.utils.book_new();
     const rows: any[][] = [];
 
+    // ===== MÜŞTERİ BİLGİLERİ =====
     rows.push(['MÜŞTERİ BİLGİLERİ']);
     rows.push(['Ad Soyad', `${data.musteri.ad} ${data.musteri.soyad}`]);
     rows.push(['TC Kimlik', data.musteri.kimlikNumarasi || '-']);
     rows.push(['Cinsiyet', data.musteri.cinsiyet || '-']);
     rows.push(['Çalıştığı Yer', data.musteri.calistigiYer || '-']);
     rows.push(['Durum', data.musteri.durum]);
-    rows.push(['Kayıt Tarihi', new Date(data.musteri.tarih).toLocaleDateString('tr-TR')]);
+    rows.push(['Kayıt Tarihi', new Date(data.musteri.tarih).toLocaleString('tr-TR')]);
     rows.push(['Not', data.musteri.not || '-']);
     rows.push([]);
 
+    // ===== TELEFON / MAİL / ADRES =====
     rows.push(['TELEFON / MAİL / ADRES']);
     rows.push(['Telefonlar', (data.musteri.telefonlar || []).join(', ') || '-']);
     rows.push(['E-postalar', (data.musteri.mailler || []).join(', ') || '-']);
     rows.push(['Adresler', (data.musteri.adresler || []).join(' | ') || '-']);
     rows.push([]);
 
+    // ===== DURUM GEÇMİŞİ =====
+    rows.push(['DURUM GEÇMİŞİ']);
+    rows.push(['Tarih', 'Eski Durum', 'Yeni Durum', 'İşlem Yapan']);
+
+    const durumGecmisi = data.durumGecmisi || [];
+    if (durumGecmisi.length > 0) {
+      for (const g of durumGecmisi) {
+        rows.push([
+          new Date(g.tarih).toLocaleString('tr-TR'),
+          g.eskiDurum,
+          g.yeniDurum,
+          g.islemYapan
+        ]);
+      }
+    } else {
+      rows.push(['-', '-', 'Durum değişikliği yok', '-']);
+    }
+    rows.push([]);
+
+    // ===== İLETİŞİM GEÇMİŞİ =====
     rows.push(['İLETİŞİM GEÇMİŞİ']);
     rows.push(['Tarih', 'Ekleyen', 'Not', 'Alanlar', 'İşlem Notları']);
 
@@ -49,11 +70,11 @@ export class RaporService {
         : '-';
 
       const islemNotlari = (i.islemGecmisi || [])
-        .map((g: any) => `[${new Date(g.tarih).toLocaleDateString('tr-TR')}] ${g.islemYapan}: ${g.not}`)
+        .map((g: any) => `[${new Date(g.tarih).toLocaleString('tr-TR')}] ${g.islemYapan}: ${g.not}`)
         .join('\n') || '-';
 
       rows.push([
-        new Date(i.tarih).toLocaleDateString('tr-TR'),
+        new Date(i.tarih).toLocaleString('tr-TR'),
         i.islemYapan,
         i.not || '-',
         alanlarStr,
@@ -69,4 +90,4 @@ export class RaporService {
     XLSX.utils.book_append_sheet(wb, ws, 'Rapor');
     XLSX.writeFile(wb, `${data.musteri.ad}_${data.musteri.soyad}_rapor.xlsx`);
   }
-}
+} 

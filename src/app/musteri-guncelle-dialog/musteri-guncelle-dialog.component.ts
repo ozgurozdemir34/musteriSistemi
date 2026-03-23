@@ -24,7 +24,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgxMaskDirective } from 'ngx-mask';
 import { ChangeDetectorRef } from '@angular/core';
 
-// ✅ İletişim listesi dialog olarak açılacak
 import { IletisimListeComponent } from '../iletisim-liste/iletisim-liste.component';
 
 @Component({
@@ -61,7 +60,7 @@ export class MusteriGuncelleDialogComponent implements OnInit {
     ],
     calistigiYer: [''],
     cinsiyet: [''],
-    durum: ['Aktif'],
+    durum: [''],
     not: [''],
     adresler: this.fb.array([]),
     telefon: this.fb.array([]),
@@ -77,8 +76,13 @@ export class MusteriGuncelleDialogComponent implements OnInit {
     private cd: ChangeDetectorRef,
     private dialog: MatDialog
   ) {
-    this.form.patchValue(data);
     this.musteriId = data?.id ?? null;
+
+    // durum'u hem küçük hem büyük harfle dene
+    this.form.patchValue({
+      ...data,
+      durum: data.durum ?? data.Durum ?? 'Aktif'
+    });
 
     data.adresler?.forEach((a: any) =>
       this.adresArray.push(this.adresGroup(a))
@@ -105,16 +109,6 @@ export class MusteriGuncelleDialogComponent implements OnInit {
       maxHeight: '90vh',
       data: { musteriId: this.musteriId }
     });
-  }
-
-  private matchValidator(a: string, b: string) {
-    return (group: AbstractControl) => {
-      const c1 = group.get(a);
-      const c2 = group.get(b);
-      if (!c1 || !c2) return null;
-      c2.setErrors(c1.value !== c2.value ? { mismatch: true } : null);
-      return null;
-    };
   }
 
   private telefonGroup(t?: any) {
