@@ -1,0 +1,43 @@
+<h2 mat-dialog-title>Şifre Güncelle: <span style="color: #3f51b5;">{{ data.kullaniciadi }}</span></h2>
+
+<mat-dialog-content>
+  <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px; min-width: 350px;">
+    
+    <mat-form-field appearance="outline">
+      <mat-label>Yeni Şifre</mat-label>
+      <input matInput [type]="hideSifre ? 'password' : 'text'" [(ngModel)]="sifre">
+      <button mat-icon-button matSuffix (click)="hideSifre = !hideSifre" type="button">
+        <mat-icon>{{hideSifre ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Yeni Şifre (Tekrar)</mat-label>
+      <input matInput [type]="hideSifreTekrar ? 'password' : 'text'" [(ngModel)]="sifreTekrar">
+      <button mat-icon-button matSuffix (click)="hideSifreTekrar = !hideSifreTekrar" type="button">
+        <mat-icon>{{hideSifreTekrar ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <div style="font-size: 12px; color: #666; background: #f9f9f9; padding: 10px; border-radius: 4px;">
+      <p [style.color]="isLengthValid() ? 'green' : 'red'">● En az 8 karakter</p>
+      <p [style.color]="hasLetter() ? 'green' : 'red'">● En az 1 harf</p>
+      <p [style.color]="hasNumber() ? 'green' : 'red'">● En az 1 rakam</p>
+      <p [style.color]="hasSpecial() ? 'green' : 'red'">● En az 1 özel karakter</p>
+      <hr style="border: 0; border-top: 1px solid #ddd;">
+      <p [style.color]="doPasswordsMatch() ? 'green' : 'red'">
+        <strong>●{{ doPasswordsMatch() ? 'Şifreler Eşleşiyor' : 'Şifreler Eşleşmiyor' }}</strong>
+      </p>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()">İptal</button>
+  <button mat-raised-button color="primary" 
+          [disabled]="!isSifreGecerli()" 
+          (click)="kaydet()">
+    Şifreyi Güncelle
+  </button>
+</mat-dialog-actions>

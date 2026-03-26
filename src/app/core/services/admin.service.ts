@@ -97,5 +97,8 @@ kullaniciEkle(body: {
 }
 
 
+kullaniciGuncelle(id: number, body: { kullaniciadi: string; sifre?: string }) {
+  return this.http.put(`${this.baseUrl}/admin/kullanici/${id}/guncelle`, body);
+}
 
 }

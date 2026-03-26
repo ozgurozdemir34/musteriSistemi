@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { KullaniciEkleDialogComponent } from '../../../kullanici-ekle-dialog/kullanici-ekle-dialog.component';
-
+import { KullaniciDuzenleDialogComponent } from '../../../kullanici-duzenle-dialog/kullanici-duzenle-dialog.component';
 @Component({
   selector: 'app-admin-kullanici',
   standalone: true,
@@ -88,7 +88,28 @@ export class AdminKullaniciComponent implements OnInit {
     this.admin.dropdownSecenekListe(id)
       .subscribe(res => this.secenekler = res);
   }
+  kullaniciDuzenleAc(u: KullaniciRow) {
+  // Mevcut kullanıcı bilgilerini kopyalayarak gönderiyoruz
+  const dialogRef = this.dialog.open(KullaniciDuzenleDialogComponent, {
+    width: '400px',
+    data: { id: u.id, kullaniciadi: u.kullaniciadi }
+  });
 
+  dialogRef.afterClosed().subscribe(res => {
+    if (res) {
+      this.loading = true;
+      this.admin.kullaniciGuncelle(u.id, res)
+        .pipe(finalize(() => this.loading = false))
+        .subscribe({
+          next: () => {
+            this.getir(); // Listeyi yenile
+            // Buraya bir Toast/SnackBar mesajı eklenebilir
+          },
+          error: (err) => this.error = "Güncelleme sırasında hata oluştu."
+        });
+    }
+  });
+}
   secenekSil(id: number) {
     if (!this.seciliTipId) return;
 
