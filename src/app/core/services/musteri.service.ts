@@ -85,5 +85,60 @@ kullanicilariGetir() {
 }
 musteriRaporGetir(musteriId: number) {
   return this.http.get<any>(`${this.baseUrl}/rapor/musteri/${musteriId}`);
+
+}
+
+dashboardStats(): Observable<any> {
+  return this.http.get(`${this.baseUrl}/musteri/dashboard-istatistik`);
+}
+iletisimDosyaYukle(iletisimId: number, dosya: File) {
+  const formData = new FormData();
+  formData.append('dosya', dosya);
+  return this.http.post<any>(
+    `${this.baseUrl}/iletisim/dosyayukle?iletisimId=${iletisimId}`,
+    formData
+  );
+}
+
+private adresApiUrl = 'https://api.tradres.com.tr/public/v1/catalog/providers/localsqlite/nodes';
+private adresApiKey = 'trd_live_BuLPt2BsbF8NWryAYNkGzJREpvgMnQGq';
+
+private adresHeaders() {
+  return { headers: { 'X-Api-Key': this.adresApiKey } };
+}
+
+illeriGetir() {
+  return this.http.get<any[]>(
+    `${this.adresApiUrl}?level=province&take=200`,
+    this.adresHeaders()
+  );
+}
+
+ilceleriGetir(ilId: number) {
+  return this.http.get<any[]>(
+    `${this.adresApiUrl}?level=town&parentId=${ilId}&take=200`,
+    this.adresHeaders()
+  );
+}
+
+mahalleleriGetir(ilceId: number) {
+  return this.http.get<any[]>(
+    `${this.adresApiUrl}?level=quarter&parentId=${ilceId}&take=200`,
+    this.adresHeaders()
+  );
+}
+
+sokaklariGetir(mahalleId: number) {
+  return this.http.get<any[]>(
+    `${this.adresApiUrl}?level=road&parentId=${mahalleId}&take=200`,
+    this.adresHeaders()
+  );
+}
+mailGonder(data: any) {
+  return this.http.post(`${this.baseUrl}/mail/gonder`, data);
+}
+
+getGonderilenMailler(musteriId: number) {
+  return this.http.get<any[]>(`${this.baseUrl}/mail/liste/${musteriId}`);
 }
 }

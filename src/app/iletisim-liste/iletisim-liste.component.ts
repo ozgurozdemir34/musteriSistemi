@@ -39,7 +39,6 @@ import { CaseAtaDialogComponent } from '../case-ata-dialog/case-ata-dialog.compo
 export class IletisimListeComponent implements OnInit {
 
   iletisimler: any[] = [];
-  // Header row'da expandedDetail OLMAMALI — sadece data ve detail row'da olacak
   displayedColumns: string[] = ['musteri', 'notBtn', 'tarih'];
   displayedColumnsWithExpand: string[] = [...this.displayedColumns, 'expandedDetail'];
   expandedElement: any | null = null;
@@ -52,8 +51,11 @@ export class IletisimListeComponent implements OnInit {
 
   yeniIslemNot: any = {};
   islemYukleniyor: any = {};
+  dosyaYukleniyor: any = {};
   dropdownMap: any = {};
   objectKeys = Object.keys;
+
+  baseUrl = 'https://localhost:7213';
 
   constructor(
     private service: MusteriService,
@@ -100,10 +102,30 @@ export class IletisimListeComponent implements OnInit {
     this.service.iletisimIslemEkle(body)
       .pipe(finalize(() => this.islemYukleniyor[i.id] = false))
       .subscribe({
-        next: () => {
-          this.yeniIslemNot[i.id] = '';
-        },
+        next: () => { this.yeniIslemNot[i.id] = ''; },
         error: () => alert('İşlem eklenemedi')
+      });
+  }
+
+  dosyaSec(event: any, i: any) {
+    const dosya: File = event.target.files[0];
+    if (!dosya) return;
+
+    const izinli = ['image/jpeg', 'image/png'];
+    if (!izinli.includes(dosya.type)) {
+      alert('Sadece jpg ve png dosyası yüklenebilir.');
+      return;
+    }
+
+    this.dosyaYukleniyor[i.id] = true;
+    this.service.iletisimDosyaYukle(i.id, dosya)
+      .pipe(finalize(() => this.dosyaYukleniyor[i.id] = false))
+      .subscribe({
+        next: (res) => {
+          if (!i.dosyalar) i.dosyalar = [];
+          i.dosyalar.push(res);
+        },
+        error: () => alert('Görsel yüklenemedi')
       });
   }
 

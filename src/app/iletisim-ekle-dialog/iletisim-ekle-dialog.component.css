@@ -158,3 +158,27 @@
 .kaydet-btn:disabled {
   background: #94a3b8 !important;
 }
+.dosya-alan {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.gorsel-sec-btn {
+  font-size: 0.82rem !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+  border-radius: 6px !important;
+}
+
+.dosya-adi {
+  font-size: 0.85rem;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.dosya-ipucu {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}

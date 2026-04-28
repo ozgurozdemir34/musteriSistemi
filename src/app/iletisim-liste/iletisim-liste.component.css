@@ -345,3 +345,31 @@
   color: #64748b;
   font-weight: 600;
 }
+
+.gorsel-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.gorsel-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.gorsel-thumb:hover {
+  transform: scale(1.05);
+}
+
+.bos-gorsel {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0 0 8px;
+}
+

@@ -23,6 +23,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { IletisimEkleDialogComponent } from '../../../iletisim-ekle-dialog/iletisim-ekle-dialog.component';
 import { RaporService } from '../../../core/services/rapor.service';
+import { MailGonderDialogComponent } from '../../../mail-gonder-dialog/mail-gonder-dialog.component';
+import { MailGecmisDialogComponent } from '../../../mail-gecmis-dialog/mail-gecmis-dialog.component';
 
 @Component({
   selector: 'app-musteri-liste',
@@ -39,7 +41,8 @@ import { RaporService } from '../../../core/services/rapor.service';
     ReactiveFormsModule,
     NgxMaskDirective,
     MatIconModule,
-    MatProgressSpinner
+    MatProgressSpinner,
+    
   ],
    
   templateUrl: './musteri-liste.component.html',
@@ -48,8 +51,8 @@ import { RaporService } from '../../../core/services/rapor.service';
 export class MusteriListeComponent implements OnInit {
 
   
-  tumMusteriler: Musteri[] = [];   
-  musteriler: Musteri[] = [];      
+  tumMusteriler: any[] = [];   
+musteriler: any[] = [];  
   turler: any[] = [];
 kategoriler: any[] = [];
 yollar: any[] = [];
@@ -67,7 +70,7 @@ yollar: any[] = [];
     'detay'
   ];
 
-  expandedElement: Musteri | null = null;
+  expandedElement: any | null = null;
   iletisimAcikMusteriId: number | null = null;
    iletisimForm!: FormGroup;
   loading = false;
@@ -429,7 +432,64 @@ sonrakiSayfa() {
 }
 
 
-  detayGetir(m: Musteri): void {
-    this.expandedElement = this.expandedElement === m ? null : m;
+  detayGetir(m: any): void {
+  this.expandedElement = this.expandedElement === m ? null : m;
+}
+
+
+mailDialogAc(musteri: any) {
+  
+  if (!musteri.mail || musteri.mail.length === 0) {
+    alert('Bu müşterinin sistemde kayıtlı bir mail adresi bulunmuyor. Lütfen önce mail ekleyin.');
+    return;
   }
+
+  const ref = this.dialog.open(MailGonderDialogComponent, {
+    width: '600px',
+    data: {
+      musteriId: musteri.id,
+      adSoyad: musteri.ad + ' ' + musteri.soyad,
+      mailler: musteri.mail
+    }
+  });
+
+  ref.afterClosed().subscribe(result => {
+    if (result) {
+      this.musteriService.mailGonder(result).subscribe({
+        next: () => {
+          alert('Mail başarıyla gönderildi!');
+        },
+        error: (err) => {
+  console.error(err);
+  
+  // Backend'den gelen o detaylı mesajı yakalıyoruz
+  let hataMesaji = 'Mail gönderilirken bir hata oluştu.';
+  if (err.error && err.error.detay) {
+    hataMesaji += '\n\nDetay: ' + err.error.detay;
+  }
+  
+  alert(hataMesaji);
+}
+      });
+    }
+  });
+}
+
+mailGecmisDialogAc(musteri: any) {
+  // Eğer hiç mail kaydı yoksa uyarı ver
+  if (!musteri.mail || musteri.mail.length === 0) {
+    alert('Bu müşterinin sistemde kayıtlı bir mail adresi yok, dolayısıyla geçmişi de olamaz.');
+    return;
+  }
+
+  this.dialog.open(MailGecmisDialogComponent, {
+    width: '700px',
+    maxHeight: '90vh',
+    data: {
+      musteriId: musteri.id,
+      adSoyad: musteri.ad + ' ' + musteri.soyad
+    }
+  });
+}
+
 }

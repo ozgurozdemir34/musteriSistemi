@@ -48,8 +48,9 @@ export class AdminKullaniciComponent implements OnInit {
   constructor(public admin: AdminService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
-    this.getir();
-    this.tipleriGetir();
+ this.getir();
+  this.tipleriGetir();
+  this.webhookGetir();
   }
 
   getir() {
@@ -68,7 +69,20 @@ export class AdminKullaniciComponent implements OnInit {
     this.admin.dropdownTipListe()
       .subscribe(res => this.dropdownTipler = res);
   }
+webhookUrl = '';
 
+
+webhookGetir() {
+  this.admin.webhookGetir().subscribe(res => {
+    this.webhookUrl = res.url;
+  });
+}
+
+webhookKaydet() {
+  this.admin.webhookKaydet(this.webhookUrl).subscribe(() => {
+    alert('Webhook kaydedildi.');
+  });
+}
   tipEkle() {
     const ad = this.yeniTip.trim();
     if (!ad) return;

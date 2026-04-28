@@ -1,6 +1,5 @@
 <div class="anasayfa-wrapper">
 
-  <!-- TOP BAR -->
   <div class="top-bar">
     <div class="top-bar-left">
       <div class="logo-mark">M</div>
@@ -14,16 +13,30 @@
     </div>
   </div>
 
-  <!-- CONTENT -->
   <div class="content">
 
     <div class="hero">
       <h1 class="hero-title">Hoş Geldiniz</h1>
-      <p class="hero-sub">Ne yapmak istersiniz?</p>
+      <p class="hero-sub">Sistem genel durumu ve analizler</p>
+    </div>
+
+    <div class="dashboard-grid" *ngIf="stats">
+      <div class="chart-kart">
+        <h3><mat-icon>pie_chart</mat-icon> Müşteri Durumları</h3>
+        <div class="canvas-wrap">
+          <canvas #durumChart></canvas>
+        </div>
+      </div>
+
+      <div class="chart-kart">
+        <h3><mat-icon>insights</mat-icon> İşlem Trafiği (7 Gün)</h3>
+        <div class="canvas-wrap">
+          <canvas #trafikChart></canvas>
+        </div>
+      </div>
     </div>
 
     <div class="kart-grid">
-
       <div class="nav-kart" (click)="musteriyeGit()">
         <div class="kart-ikon musteri-ikon">
           <mat-icon>people</mat-icon>
@@ -45,9 +58,7 @@
         </div>
         <mat-icon class="kart-ok">arrow_forward</mat-icon>
       </div>
-
     </div>
 
   </div>
-
 </div>

@@ -1,3 +1,16 @@
+<mat-card style="margin-bottom:16px;">
+  <h2>Webhook Ayarı</h2>
+  <div style="display:flex; gap:10px; align-items:baseline;">
+    <mat-form-field appearance="outline" style="flex:1;">
+      <mat-label>Webhook URL</mat-label>
+      <input matInput [(ngModel)]="webhookUrl" placeholder="https://...">
+    </mat-form-field>
+    <button mat-raised-button color="primary" (click)="webhookKaydet()">
+      Kaydet
+    </button>
+  </div>
+</mat-card>
+
 <mat-card>
   <h2>Admin Panel - Kullanıcılar</h2>
   <div style="display:flex; justify-content:flex-start; margin-top:10px;">
@@ -5,6 +18,8 @@
     Kullanıcı ekle
   </button>
 </div>
+
+
   <p *ngIf="loading" style="margin-top:12px;">Yükleniyor...</p>
   <p *ngIf="error" style="color:red; margin-top:12px;">{{ error }}</p>
 

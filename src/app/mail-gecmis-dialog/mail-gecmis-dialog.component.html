@@ -1,0 +1,50 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <div class="dialog-header-left">
+      <div class="logo-mark" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+        <mat-icon style="color: white; font-size: 20px; width: 20px; height: 20px; margin-top: 8px; margin-left: 8px;">history_edu</mat-icon>
+      </div>
+      <div>
+        <h2 class="dialog-title">Mail Geçmişi</h2>
+        <p class="dialog-sub">Alıcı: {{ data.adSoyad }}</p>
+      </div>
+    </div>
+    <button mat-icon-button class="kapat-btn" (click)="dialogRef.close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content" style="padding: 20px; min-height: 300px;">
+    
+    <div *ngIf="loading" style="text-align: center; padding: 50px; color: #64748b;">
+      <mat-spinner diameter="40" style="margin: 0 auto 16px;"></mat-spinner>
+      Gmail sunucularından geçmiş taranıyor...
+    </div>
+
+    <div *ngIf="!loading && error" style="color: #ef4444; text-align: center; padding: 20px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+      <mat-icon style="vertical-align: middle;">error</mat-icon> {{ error }}
+    </div>
+
+    <div *ngIf="!loading && !error && mailler.length === 0" style="text-align: center; padding: 50px; color: #64748b; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+      <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #94a3b8; margin-bottom: 10px;">inbox</mat-icon><br>
+      Bu müşteriye ait bir mail geçmişi bulunamadı.
+    </div>
+
+    <div *ngIf="!loading && !error && mailler.length > 0" style="display: flex; flex-direction: column; gap: 16px;">
+      <div *ngFor="let mail of mailler" style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; background: #f8fafc; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+          <div style="font-weight: 600; color: #0f172a; font-size: 1.1rem;">{{ mail.konu || '(Konusuz)' }}</div>
+          <div style="font-size: 0.8rem; color: #64748b; white-space: nowrap; background: #e2e8f0; padding: 4px 8px; border-radius: 12px;">
+            {{ mail.tarih | date:'dd.MM.yyyy HH:mm' }}
+          </div>
+        </div>
+        <div style="font-size: 0.85rem; color: #475569; margin-bottom: 12px;">
+          <strong>Kime:</strong> {{ mail.alici }}
+        </div>
+        <div style="background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 12px; font-size: 0.95rem; color: #334155; max-height: 250px; overflow-y: auto;" [innerHTML]="mail.icerik">
+        </div>
+      </div>
+    </div>
+
+  </mat-dialog-content>
+</div>

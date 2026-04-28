@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -31,12 +32,19 @@ import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
     MatIconModule,
     NgxMaskDirective
   ],
-   templateUrl: './musteri-dialog.component.html',
+  templateUrl: './musteri-dialog.component.html',
   styleUrls: ['./musteri-dialog.component.css']
-  
- 
 })
-export class MusteriDialogComponent {
+export class MusteriDialogComponent implements OnInit {
+  
+  private adresApiUrl = 'https://api.tradres.com.tr/public/v1/catalog/providers/localsqlite/nodes';
+  private adresApiKey = 'trd_live_BuLPt2BsbF8NWryAYNkGzJREpvgMnQGq';
+
+  iller: any[] = [];
+  ilcelerList: { [key: number]: any[] } = {};
+  mahallelerList: { [key: number]: any[] } = {};
+  sokaklarList: { [key: number]: any[] } = {};
+
   form = this.fb.group({
     ad: ['', Validators.required],
     soyad: ['', Validators.required],
@@ -58,49 +66,100 @@ export class MusteriDialogComponent {
     mail: this.fb.array([])
   });
 
-  constructor(private fb: FormBuilder, public dialogRef: MatDialogRef<MusteriDialogComponent>) {}
+  constructor(
+    private fb: FormBuilder, 
+    public dialogRef: MatDialogRef<MusteriDialogComponent>,
+    private http: HttpClient
+  ) {}
 
-  private matchValidator(a: string, b: string) {
-    return (group: AbstractControl) => {
-      const c1 = group.get(a);
-      const c2 = group.get(b);
-      if (!c1 || !c2) return null;
-      c2.setErrors(c1.value !== c2.value ? { mismatch: true } : null);
-      return null;
-    };
+  ngOnInit(): void {
+    this.illeriGetir().subscribe(res => {
+      this.iller = res;
+    });
   }
 
-  private telefonGroup() {
-    return this.fb.group(
-      { numara: ['', Validators.required] },
-      
-    );
+  // --- API ÇAĞRILARI ---
+  private adresHeaders() {
+    return { headers: { 'X-Api-Key': this.adresApiKey } };
   }
+  illeriGetir() { return this.http.get<any[]>(`${this.adresApiUrl}?level=province&take=200`, this.adresHeaders()); }
+  ilceleriGetir(ilId: number) { return this.http.get<any[]>(`${this.adresApiUrl}?level=town&parentId=${ilId}&take=200`, this.adresHeaders()); }
+  mahalleleriGetir(ilceId: number) { return this.http.get<any[]>(`${this.adresApiUrl}?level=quarter&parentId=${ilceId}&take=200`, this.adresHeaders()); }
+  sokaklariGetir(mahalleId: number) { return this.http.get<any[]>(`${this.adresApiUrl}?level=road&parentId=${mahalleId}&take=200`, this.adresHeaders()); }
 
-  private mailGroup() {
-  return this.fb.group({
-    email: ['', [Validators.required, Validators.email]]
-  });
-}
-private adresGroup() {
-  return this.fb.group({
-    adres: ['', Validators.required]
-  });
-}
-
+  // --- FORM GROUP ÜRETİCİLERİ ---
+  private telefonGroup() { return this.fb.group({ numara: ['', Validators.required] }); }
+  private mailGroup() { return this.fb.group({ email: ['', [Validators.required, Validators.email]] }); }
+  
+  private adresGroup() {
+    return this.fb.group({
+      ilId: [null, Validators.required],
+      il: [''], 
+      ilceId: [{ value: null, disabled: true }, Validators.required],
+      ilce: [''],
+      mahalleId: [{ value: null, disabled: true }, Validators.required],
+      mahalle: [''],
+      sokakId: [{ value: null, disabled: true }, Validators.required],
+      sokak: [''],
+      acikAdres: ['']
+    });
+  }
 
   get adresArray() { return this.form.get('adresler') as FormArray; }
   get telefonArray() { return this.form.get('telefon') as FormArray; }
   get mailArray() { return this.form.get('mail') as FormArray; }
 
+  // --- ADRES SEÇİM OLAYLARI ---
+  ilDegisti(ilId: number, index: number) {
+    const ilName = this.iller.find(x => x.id === ilId)?.name || '';
+    const group = this.adresArray.at(index);
+    group.patchValue({ il: ilName, ilceId: null, ilce: '', mahalleId: null, mahalle: '', sokakId: null, sokak: '' });
+    group.get('ilceId')?.enable();
+    group.get('mahalleId')?.disable();
+    group.get('sokakId')?.disable();
+    
+    this.ilcelerList[index] = [];
+    this.mahallelerList[index] = [];
+    this.sokaklarList[index] = [];
+
+    this.ilceleriGetir(ilId).subscribe(res => this.ilcelerList[index] = res);
+  }
+
+  ilceDegisti(ilceId: number, index: number) {
+    const ilceName = this.ilcelerList[index].find(x => x.id === ilceId)?.name || '';
+    const group = this.adresArray.at(index);
+    group.patchValue({ ilce: ilceName, mahalleId: null, mahalle: '', sokakId: null, sokak: '' });
+    group.get('mahalleId')?.enable();
+    group.get('sokakId')?.disable();
+
+    this.mahallelerList[index] = [];
+    this.sokaklarList[index] = [];
+
+    this.mahalleleriGetir(ilceId).subscribe(res => this.mahallelerList[index] = res);
+  }
+
+  mahalleDegisti(mahalleId: number, index: number) {
+    const mName = this.mahallelerList[index].find(x => x.id === mahalleId)?.name || '';
+    const group = this.adresArray.at(index);
+    group.patchValue({ mahalle: mName, sokakId: null, sokak: '' });
+    group.get('sokakId')?.enable();
+
+    this.sokaklarList[index] = [];
+    this.sokaklariGetir(mahalleId).subscribe(res => this.sokaklarList[index] = res);
+  }
+
+  sokakDegisti(sokakId: number, index: number) {
+    const sName = this.sokaklarList[index].find(x => x.id === sokakId)?.name || '';
+    this.adresArray.at(index).patchValue({ sokak: sName });
+  }
+
+  // --- DİĞER FONKSİYONLAR ---
   onlyNumber(event: KeyboardEvent) {
     const charCode = event.charCode;
     if (charCode < 48 || charCode > 57) event.preventDefault();
   }
 
-  adresEkle() {
-  this.adresArray.push(this.adresGroup());}
-
+  adresEkle() { this.adresArray.push(this.adresGroup()); }
   adresSil(i: number) { this.adresArray.removeAt(i); }
 
   telefonEkle() { this.telefonArray.push(this.telefonGroup()); }
@@ -120,22 +179,26 @@ private adresGroup() {
     const payload = {
       ...raw,
       not: raw.not?.trim() || null,
-      adresler: (raw.adresler ?? []).filter((x: any) => x?.adres?.trim()),
-     telefon: (raw.telefon ?? []).map((x: any) => {
-  const obj: any = { numara: x.numara };
-  if (x.id !== null && x.id !== undefined) {
-    obj.id = x.id;
-  }
-  return obj;
-}), 
-   mail: (raw.mail ?? []).map((x: any) => {
-  const obj: any = { email: x.email };
-  if (x.id !== null && x.id !== undefined) {
-    obj.id = x.id;
-  }
-  return obj;
-}),
-
+      // Sadece veritabanının beklediği string alanları gönderiyoruz
+      adresler: (raw.adresler ?? [])
+        .filter((x: any) => x?.il?.trim())
+        .map((x: any) => ({
+          il: x.il,
+          ilce: x.ilce,
+          mahalle: x.mahalle,
+          sokak: x.sokak,
+          acikAdres: x.acikAdres
+        })),
+      telefon: (raw.telefon ?? []).map((x: any) => {
+        const obj: any = { numara: x.numara };
+        if (x.id !== null && x.id !== undefined) obj.id = x.id;
+        return obj;
+      }), 
+      mail: (raw.mail ?? []).map((x: any) => {
+        const obj: any = { email: x.email };
+        if (x.id !== null && x.id !== undefined) obj.id = x.id;
+        return obj;
+      }),
     };
 
     this.dialogRef.close(payload);

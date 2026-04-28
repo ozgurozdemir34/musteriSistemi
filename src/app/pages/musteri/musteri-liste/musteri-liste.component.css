@@ -500,3 +500,74 @@
   color: #16a34a !important;
   border-color: #bbf7d0 !important;
 }
+
+/* ===== YENİ EKLENEN: TIMELINE (ZAMAN TÜNELİ) ===== */
+.timeline-wrap {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  position: relative;
+}
+/* Sol taraftaki dikey çizgi */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  bottom: 5px;
+  width: 2px;
+  background: #e2e8f0;
+}
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+}
+/* Noktalar */
+.tl-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #bfdbfe;
+  flex-shrink: 0;
+  margin-top: 4px;
+  z-index: 1;
+}
+.tl-content {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #475569;
+  background: #f8fafc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  width: 100%;
+}
+.tl-date {
+  font-weight: 700;
+  color: #3b82f6;
+  font-size: 0.75rem;
+}
+.tl-user {
+  background: #e2e8f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.tl-text b {
+  color: #1e293b;
+}

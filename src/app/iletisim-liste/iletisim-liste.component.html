@@ -69,6 +69,7 @@
           <div class="expanded-wrap" [class.open]="expandedElement === i">
             <div class="expanded-body" *ngIf="expandedElement === i">
 
+              <!-- Alanlar -->
               <div class="detay-bolum" *ngIf="!alanlarBosMu(i.alanlar)">
                 <div class="detay-baslik"><mat-icon>list_alt</mat-icon> Alanlar</div>
                 <div class="alan-grid">
@@ -79,11 +80,37 @@
                 </div>
               </div>
 
+              <!-- Not -->
               <div class="detay-bolum" *ngIf="i.not">
                 <div class="detay-baslik"><mat-icon>notes</mat-icon> Not</div>
                 <p class="not-metin">{{ i.not }}</p>
               </div>
 
+              <!-- Görseller -->
+              <div class="detay-bolum">
+                <div class="detay-baslik"><mat-icon>image</mat-icon> Görseller</div>
+
+                <div class="gorsel-grid" *ngIf="i.dosyalar?.length">
+                  <a *ngFor="let d of i.dosyalar"
+                     [href]="baseUrl + '/' + d.dosyaYolu"
+                     target="_blank">
+                    <img [src]="baseUrl + '/' + d.dosyaYolu"
+                         [alt]="d.dosyaAdi"
+                         class="gorsel-thumb" />
+                  </a>
+                </div>
+
+                <p *ngIf="!i.dosyalar?.length" class="bos-gorsel">Henüz görsel eklenmemiş.</p>
+
+                <!-- Yükle butonu -->
+                <input #dosyaInput type="file" accept=".jpg,.jpeg,.png"
+                       style="display:none"
+                       (change)="dosyaSec($event, i)">
+
+              
+              </div>
+
+              <!-- Butonlar -->
               <div class="detay-butonlar">
                 <button mat-stroked-button class="exp-btn" (click)="musteriyeGit(i.musteriId)">
                   <mat-icon>person</mat-icon> Müşteri
@@ -96,6 +123,7 @@
                 </button>
               </div>
 
+              <!-- Yeni işlem ekle -->
               <div class="islem-ekle-wrap">
                 <div class="detay-baslik"><mat-icon>add_comment</mat-icon> Yeni İşlem Ekle</div>
                 <div class="islem-ekle-satir">

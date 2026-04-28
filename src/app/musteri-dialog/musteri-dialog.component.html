@@ -1,6 +1,5 @@
 <div class="dialog-wrapper">
 
-  <!-- HEADER -->
   <div class="dialog-header">
     <div class="dialog-header-left">
       <div class="logo-mark">M</div>
@@ -14,11 +13,9 @@
     </button>
   </div>
 
-  <!-- CONTENT -->
   <mat-dialog-content class="dialog-content">
     <form [formGroup]="form">
 
-      <!-- Temel Bilgiler -->
       <div class="section-title">
         <mat-icon>person</mat-icon> Temel Bilgiler
       </div>
@@ -82,19 +79,52 @@
         <textarea matInput rows="2" formControlName="not"></textarea>
       </mat-form-field>
 
-      <!-- Adresler -->
       <div class="section-title">
         <mat-icon>location_on</mat-icon> Adresler
       </div>
 
       <div formArrayName="adresler">
         <div *ngFor="let a of adresArray.controls; let i=index"
-             [formGroupName]="i" class="array-row">
-          <mat-form-field appearance="outline" class="ff-full">
-            <mat-label>Adres {{ i + 1 }}</mat-label>
-            <input matInput formControlName="adres">
-          </mat-form-field>
-          <button mat-icon-button color="warn" type="button" class="sil-btn" (click)="adresSil(i)">
+             [formGroupName]="i" class="array-row" style="align-items: flex-start; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px;">
+          
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; flex: 1;">
+            
+            <mat-form-field appearance="outline" style="flex: 1; min-width: 140px;">
+              <mat-label>İl</mat-label>
+              <mat-select formControlName="ilId" (selectionChange)="ilDegisti($event.value, i)">
+                <mat-option *ngFor="let il of iller" [value]="il.id">{{ il.name }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="flex: 1; min-width: 140px;">
+              <mat-label>İlçe</mat-label>
+              <mat-select formControlName="ilceId" (selectionChange)="ilceDegisti($event.value, i)">
+                <mat-option *ngFor="let ilce of ilcelerList[i]" [value]="ilce.id">{{ ilce.name }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="flex: 1; min-width: 140px;">
+              <mat-label>Mahalle</mat-label>
+              <mat-select formControlName="mahalleId" (selectionChange)="mahalleDegisti($event.value, i)">
+                <mat-option *ngFor="let m of mahallelerList[i]" [value]="m.id">{{ m.name }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="flex: 1; min-width: 140px;">
+              <mat-label>Sokak</mat-label>
+              <mat-select formControlName="sokakId" (selectionChange)="sokakDegisti($event.value, i)">
+                <mat-option *ngFor="let s of sokaklarList[i]" [value]="s.id">{{ s.name }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Açık Adres (Bina No, İç Kapı No vb.)</mat-label>
+              <input matInput formControlName="acikAdres">
+            </mat-form-field>
+
+          </div>
+
+          <button mat-icon-button color="warn" type="button" class="sil-btn" (click)="adresSil(i)" style="margin-top: 6px;">
             <mat-icon>delete</mat-icon>
           </button>
         </div>
@@ -103,7 +133,6 @@
         <mat-icon>add</mat-icon> Adres Ekle
       </button>
 
-      <!-- Telefonlar -->
       <div class="section-title">
         <mat-icon>phone</mat-icon> Telefonlar
       </div>
@@ -125,7 +154,6 @@
         <mat-icon>add</mat-icon> Telefon Ekle
       </button>
 
-      <!-- Mailler -->
       <div class="section-title">
         <mat-icon>email</mat-icon> E-posta Adresleri
       </div>
@@ -151,7 +179,6 @@
     </form>
   </mat-dialog-content>
 
-  <!-- FOOTER -->
   <div class="dialog-footer">
     <button mat-stroked-button class="iptal-btn" (click)="dialogRef.close()">
       İptal

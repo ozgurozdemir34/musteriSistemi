@@ -40,6 +40,30 @@
         <textarea matInput rows="3" formControlName="not"></textarea>
       </mat-form-field>
 
+      <div class="section-title">
+        <mat-icon>image</mat-icon> Görsel (İsteğe Bağlı)
+      </div>
+
+      <div class="dosya-alan">
+        <input #dosyaInput type="file" accept=".jpg,.jpeg,.png"
+               style="display:none"
+               (change)="dosyaSecildi($event)">
+
+        <button mat-stroked-button type="button" class="gorsel-sec-btn"
+                (click)="dosyaInput.click()">
+          <mat-icon>upload</mat-icon> Görsel Seç
+        </button>
+
+        <span *ngIf="secilenDosya" class="dosya-adi">
+          <mat-icon style="font-size:16px; vertical-align:middle;">check_circle</mat-icon>
+          {{ secilenDosya.name }}
+        </span>
+
+        <span *ngIf="!secilenDosya" class="dosya-ipucu">
+          jpg veya png, max 5MB
+        </span>
+      </div>
+
     </form>
   </mat-dialog-content>
 
@@ -49,9 +73,11 @@
       İptal
     </button>
     <button mat-flat-button class="kaydet-btn"
-            [disabled]="iletisimForm.invalid"
+            [disabled]="!iletisimForm || iletisimForm.invalid || dosyaYukleniyor"
             (click)="kaydet()">
-      <mat-icon>save</mat-icon> Kaydet
+      <mat-spinner *ngIf="dosyaYukleniyor" diameter="18" style="display:inline-block; margin-right:6px;"></mat-spinner>
+      <mat-icon *ngIf="!dosyaYukleniyor">save</mat-icon>
+      {{ dosyaYukleniyor ? 'Yükleniyor...' : 'Kaydet' }}
     </button>
   </div>
 

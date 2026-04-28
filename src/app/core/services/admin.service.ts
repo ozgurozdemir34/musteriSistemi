@@ -96,7 +96,13 @@ kullaniciEkle(body: {
   return this.http.post(`${this.baseUrl}/kullanici`, body);
 }
 
+webhookGetir() {
+  return this.http.get<any>(`${this.baseUrl}/admin/webhook`);
+}
 
+webhookKaydet(url: string) {
+  return this.http.put(`${this.baseUrl}/admin/webhook`, { url });
+}
 kullaniciGuncelle(id: number, body: { kullaniciadi: string; sifre?: string }) {
   return this.http.put(`${this.baseUrl}/admin/kullanici/${id}/guncelle`, body);
 }

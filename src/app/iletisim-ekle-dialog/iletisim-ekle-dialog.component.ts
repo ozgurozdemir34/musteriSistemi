@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MusteriService } from '../core/services/musteri.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-iletisim-ekle-dialog',
@@ -20,7 +21,8 @@ import { MusteriService } from '../core/services/musteri.service';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './iletisim-ekle-dialog.component.html',
   styleUrls: ['./iletisim-ekle-dialog.component.css']
@@ -29,6 +31,8 @@ export class IletisimEkleDialogComponent implements OnInit {
 
   iletisimForm!: FormGroup;
   dropdownlar: any[] = [];
+  secilenDosya: File | null = null;
+  dosyaYukleniyor = false;
 
   constructor(
     public dialogRef: MatDialogRef<IletisimEkleDialogComponent>,
@@ -48,11 +52,26 @@ export class IletisimEkleDialogComponent implements OnInit {
       group['not'] = ['', Validators.required];
 
       this.iletisimForm = this.fb.group(group);
+      this.iletisimForm.updateValueAndValidity();
     });
   }
 
+  dosyaSecildi(event: any) {
+    const dosya: File = event.target.files[0];
+    if (!dosya) return;
+
+    const izinli = ['image/jpeg', 'image/png'];
+    if (!izinli.includes(dosya.type)) {
+      alert('Sadece jpg ve png dosyası yüklenebilir.');
+      event.target.value = '';
+      return;
+    }
+
+    this.secilenDosya = dosya;
+  }
+
   kaydet() {
-    if (this.iletisimForm.invalid) return;
+    if (!this.iletisimForm || this.iletisimForm.invalid) return;
 
     const formValue = this.iletisimForm.value;
     const alanlar: any = {};
@@ -68,8 +87,24 @@ export class IletisimEkleDialogComponent implements OnInit {
     };
 
     this.service.iletisimEkle(body).subscribe({
-      next: () => {
-        this.dialogRef.close(true);
+      next: (iletisimRes) => {
+        if (this.secilenDosya) {
+          this.dosyaYukleniyor = true;
+          this.service.iletisimDosyaYukle(iletisimRes.id, this.secilenDosya).subscribe({
+            next: (dosyaRes) => {
+              console.log('yüklenen dosya yolu:', dosyaRes.dosyaYolu);
+              this.dosyaYukleniyor = false;
+              this.dialogRef.close(true);
+            },
+            error: () => {
+              this.dosyaYukleniyor = false;
+              alert('İletişim eklendi fakat görsel yüklenemedi.');
+              this.dialogRef.close(true);
+            }
+          });
+        } else {
+          this.dialogRef.close(true);
+        }
       },
       error: () => alert('İletişim eklenemedi')
     });
