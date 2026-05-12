@@ -372,4 +372,195 @@
   color: #94a3b8;
   margin: 0 0 8px;
 }
+ /* expanded-detail-td: padding ve border sıfırla */
+.expanded-detail-td {
+  padding: 0 !important;
+  border: none !important;
+}
 
+/* expanded-wrap: overflow visible, yükseklik otomatik */
+.expanded-wrap {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+
+  &.open {
+    max-height: none; /* BURASI KRİTİK — sabit px verme */
+    overflow: visible;
+  }
+}
+
+.expanded-body {
+  padding: 16px;
+  overflow: visible; /* taşmayı engelleme */
+}
+
+/* Görsel grid */
+.gorsel-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.gorsel-kart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  max-width: 250px;
+}
+
+.gorsel-thumb {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.ai-btn {
+  color: #6366f1;
+  border-color: #6366f1;
+  width: 100%;
+}
+
+.ai-sonuc {
+  background: #eef2ff;
+  border-left: 4px solid #6366f1;
+  padding: 12px;
+  font-size: 0.85rem;
+  color: #3730a3;
+  border-radius: 0 4px 4px 0;
+  line-height: 1.4;
+  max-height: 150px;
+  overflow-y: auto;
+  word-wrap: break-word;
+}
+
+/* Chat konteyneri */
+.chat-konteyner {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Mesaj listesi: sadece bu kısma scroll */
+.chat-mesaj-listesi {
+  height: 200px;
+  overflow-y: auto;
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Balonlar */
+.chat-balon {
+  display: flex;          /* EKLE */
+  flex-direction: column; /* EKLE */
+  padding: 8px 12px;
+  border-radius: 12px;
+  max-width: 75%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  word-wrap: break-word;
+
+  &.benim {
+    align-self: flex-end;
+    background: #6366f1;
+    color: #fff;
+    border-bottom-right-radius: 0;
+  }
+
+  &.onlarin {
+    align-self: flex-start;
+    background: #fff;
+    color: #333;
+    border-bottom-left-radius: 0;
+  }
+}
+
+.balon-isim {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  margin-bottom: 4px;
+  font-weight: 600;
+  line-height: 1.2;    /* EKLE */
+}
+
+.balon-metin {
+  font-size: 0.95rem;
+  line-height: 1.4;    /* EKLE */
+}
+.chat-bos {
+  text-align: center;
+  color: #818cf8;
+  font-size: 0.85rem;
+  margin-top: 20px;
+}
+
+/* Input satırı */
+.chat-input-satir {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #c7d2fe;
+  border-radius: 20px;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.chat-dosya-btn {
+  background: transparent;
+  border: 1px solid #c7d2fe;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6366f1;
+  flex-shrink: 0;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.chat-resim-onizleme {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.chat-dosya-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}

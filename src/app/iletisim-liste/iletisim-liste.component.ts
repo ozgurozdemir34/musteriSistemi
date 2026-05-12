@@ -16,6 +16,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { IletisimIslemGecmisiComponent } from '../iletisim-islem-gecmisi/iletisim-islem-gecmisi.component';
 import { AtananCaseDialogComponent } from '../atanan-case-dialog/atanan-case-dialog.component';
 import { CaseAtaDialogComponent } from '../case-ata-dialog/case-ata-dialog.component';
+import { ChatService } from '../core/services/chat.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-iletisim-liste',
@@ -42,7 +44,10 @@ export class IletisimListeComponent implements OnInit {
   displayedColumns: string[] = ['musteri', 'notBtn', 'tarih'];
   displayedColumnsWithExpand: string[] = [...this.displayedColumns, 'expandedDetail'];
   expandedElement: any | null = null;
-
+  chatMesajlari: { [key: number]: Observable<any[]> } = {};
+  yeniChatMesaj: { [key: number]: string } = {};
+  benimId: number = 0;
+  benimAd: string = '';
   page = 1;
   totalCount = 0;
   pageSize = 20;
@@ -52,6 +57,14 @@ export class IletisimListeComponent implements OnInit {
   yeniIslemNot: any = {};
   islemYukleniyor: any = {};
   dosyaYukleniyor: any = {};
+  chatDosyaYukleniyor: { [key: number]: boolean } = {};
+
+  aiLoading: any = {};
+  aiResult: any = {};
+  oncekiMesajSayisi: { [key: number]: number } = {};
+
+  hedefIletisimId: number | null = null;
+
   dropdownMap: any = {};
   objectKeys = Object.keys;
 
@@ -61,12 +74,27 @@ export class IletisimListeComponent implements OnInit {
     private service: MusteriService,
     private router: Router,
     private dialog: MatDialog,
+    private chatService: ChatService,
     private route: ActivatedRoute,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
   ngOnInit() {
-    this.getir();
+    this.kullaniciBilgileriniCek();
+
+    if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
+
+    this.route.queryParams.subscribe(params => {
+      const hedefId = params['hedefId'] ? +params['hedefId'] : null;
+      this.getir(() => {
+        if (hedefId) {
+          this.iletisimeGit(hedefId);
+        }
+      });
+    });
+
     this.service.dropdownAll().subscribe(res => {
       res.forEach((d: any) => {
         this.dropdownMap[d.key] = d.ad;
@@ -74,22 +102,160 @@ export class IletisimListeComponent implements OnInit {
     });
   }
 
-  getir() {
+  kullaniciBilgileriniCek() {
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        this.benimId = user.id || 0;
+        this.benimAd = (user.ad && user.soyad) ? (user.ad + ' ' + user.soyad) : 'Gizemli Kullanıcı';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  getir(callback?: () => void) {
     this.loading = true;
     this.error = null;
+    this.chatMesajlari = {};
+    this.oncekiMesajSayisi = {};
     this.service.iletisimListeGetir({ page: this.page })
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (res) => {
           this.iletisimler = res?.data ?? [];
           this.totalCount = res?.totalCount ?? 0;
+          this.tumIletisimleriDinle();
+          if (callback) callback();
         },
         error: () => this.error = 'Liste alınamadı'
       });
   }
 
+  tumIletisimleriDinle() {
+    this.iletisimler.forEach(row => {
+      const id = row.id || row.iletisimId;
+      if (!id || this.chatMesajlari[id]) return;
+
+      const mesajlar$ = this.chatService.mesajlariGetir(id.toString());
+      this.chatMesajlari[id] = mesajlar$;
+
+      mesajlar$.subscribe({
+        next: (data) => {
+          const guncelSayi = data.length;
+          const eskiSayi = this.oncekiMesajSayisi[id] ?? -1;
+
+          if (eskiSayi === -1) {
+            this.oncekiMesajSayisi[id] = guncelSayi;
+            return;
+          }
+
+          if (guncelSayi > eskiSayi) {
+            const sonMesaj = data[guncelSayi - 1];
+            if (sonMesaj.gonderenId !== this.benimId) {
+              const bildirimMetin = sonMesaj.tip === 'dosya' ? `📎 ${sonMesaj.metin}` : sonMesaj.metin;
+              this.bildirimGonder(sonMesaj.gonderenAd, bildirimMetin, id);
+            }
+          }
+
+          this.oncekiMesajSayisi[id] = guncelSayi;
+        },
+        error: (err) => console.error(err)
+      });
+    });
+  }
+
   notAcKapat(row: any) {
     this.expandedElement = this.expandedElement === row ? null : row;
+  }
+
+  bildirimGonder(kimden: string, metin: string, iletisimId: number) {
+    if (!("Notification" in window)) return;
+
+    if (Notification.permission === "granted") {
+      const bildirim = new Notification(`Yeni Mesaj: ${kimden}`, {
+        body: metin
+      });
+
+      bildirim.onclick = () => {
+        window.focus();
+        bildirim.close();
+        this.router.navigate(['/iletisim'], { queryParams: { hedefId: iletisimId } });
+      };
+    }
+  }
+
+  iletisimeGit(iletisimId: number) {
+    const mevcutSayfada = this.iletisimler.find(i => (i.id || i.iletisimId) === iletisimId);
+
+    if (mevcutSayfada) {
+      this.satiriAcVeScrollEt(mevcutSayfada, iletisimId);
+      return;
+    }
+
+    this.dogruSayfayiBul(iletisimId, 1);
+  }
+
+  private dogruSayfayiBul(iletisimId: number, arananSayfa: number) {
+    if (arananSayfa > this.toplamSayfa) return;
+
+    this.service.iletisimListeGetir({ page: arananSayfa }).subscribe({
+      next: (res) => {
+        const liste = res?.data ?? [];
+        const bulunan = liste.find((i: any) => (i.id || i.iletisimId) === iletisimId);
+
+        if (bulunan) {
+          this.page = arananSayfa;
+          this.getir(() => {
+            const hedef = this.iletisimler.find(i => (i.id || i.iletisimId) === iletisimId);
+            if (hedef) this.satiriAcVeScrollEt(hedef, iletisimId);
+          });
+        } else {
+          this.dogruSayfayiBul(iletisimId, arananSayfa + 1);
+        }
+      },
+      error: () => console.error(`Sayfa ${arananSayfa} aranamadı`)
+    });
+  }
+
+  private satiriAcVeScrollEt(row: any, iletisimId: number) {
+    if (this.expandedElement !== row) {
+      this.notAcKapat(row);
+    }
+
+    setTimeout(() => {
+      const element = document.getElementById(`satir-${iletisimId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 350);
+  }
+
+  chatGonder(row: any) {
+    const id = row.id || row.iletisimId;
+    const metin = this.yeniChatMesaj[id]?.trim();
+    if (!metin) return;
+    this.chatService.mesajGonder(id.toString(), this.benimId, this.benimAd, metin);
+    this.yeniChatMesaj[id] = '';
+  }
+
+  async chatDosyaSec(event: any, row: any) {
+    const dosya: File = event.target.files[0];
+    if (!dosya) return;
+
+    const id = row.id || row.iletisimId;
+    this.chatDosyaYukleniyor[id] = true;
+
+    try {
+      await this.chatService.dosyaGonder(id.toString(), this.benimId, this.benimAd, dosya);
+    } catch (e) {
+      alert('Dosya gönderilemedi');
+      console.error(e);
+    } finally {
+      this.chatDosyaYukleniyor[id] = false;
+      event.target.value = '';
+    }
   }
 
   islemEkle(i: any) {
@@ -127,6 +293,23 @@ export class IletisimListeComponent implements OnInit {
         },
         error: () => alert('Görsel yüklenemedi')
       });
+  }
+
+  async aiAnalizYap(dosya: any) {
+    this.aiLoading[dosya.id] = true;
+    this.aiResult[dosya.id] = null;
+
+    try {
+      const sonuc = await this.service.kayitliResmiAnalizEt(dosya.id);
+      let formatliMetin = sonuc.analiz.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      formatliMetin = formatliMetin.replace(/\n/g, '<br/>');
+      this.aiResult[dosya.id] = formatliMetin;
+    } catch (error) {
+      console.error(error);
+      this.aiResult[dosya.id] = "Analiz sırasında bir hata oluştu.";
+    } finally {
+      this.aiLoading[dosya.id] = false;
+    }
   }
 
   musteriyeGit(id: number) {

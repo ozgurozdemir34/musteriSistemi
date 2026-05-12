@@ -1,6 +1,5 @@
 <div class="page-wrapper">
 
-  <!-- HEADER BAR -->
   <div class="top-bar">
     <div class="top-bar-left">
       <div class="logo-mark">M</div>
@@ -65,11 +64,10 @@
       <ng-container matColumnDef="expandedDetail">
         <td mat-cell *matCellDef="let i"
             [attr.colspan]="displayedColumns.length"
-            style="padding:0; border:none;">
+            class="expanded-detail-td">
           <div class="expanded-wrap" [class.open]="expandedElement === i">
             <div class="expanded-body" *ngIf="expandedElement === i">
 
-              <!-- Alanlar -->
               <div class="detay-bolum" *ngIf="!alanlarBosMu(i.alanlar)">
                 <div class="detay-baslik"><mat-icon>list_alt</mat-icon> Alanlar</div>
                 <div class="alan-grid">
@@ -80,37 +78,110 @@
                 </div>
               </div>
 
-              <!-- Not -->
               <div class="detay-bolum" *ngIf="i.not">
                 <div class="detay-baslik"><mat-icon>notes</mat-icon> Not</div>
                 <p class="not-metin">{{ i.not }}</p>
               </div>
 
-              <!-- Görseller -->
               <div class="detay-bolum">
                 <div class="detay-baslik"><mat-icon>image</mat-icon> Görseller</div>
-
                 <div class="gorsel-grid" *ngIf="i.dosyalar?.length">
-                  <a *ngFor="let d of i.dosyalar"
-                     [href]="baseUrl + '/' + d.dosyaYolu"
-                     target="_blank">
-                    <img [src]="baseUrl + '/' + d.dosyaYolu"
-                         [alt]="d.dosyaAdi"
-                         class="gorsel-thumb" />
-                  </a>
+                  <div class="gorsel-kart" *ngFor="let d of i.dosyalar">
+                    <a [href]="baseUrl + '/' + d.dosyaYolu" target="_blank">
+                      <img [src]="baseUrl + '/' + d.dosyaYolu"
+                           [alt]="d.dosyaAdi"
+                           class="gorsel-thumb" />
+                    </a>
+                    <button mat-stroked-button class="ai-btn" (click)="aiAnalizYap(d)" [disabled]="aiLoading[d.id]">
+                      <mat-icon *ngIf="!aiLoading[d.id]">auto_awesome</mat-icon>
+                      <mat-spinner *ngIf="aiLoading[d.id]" diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner>
+                      {{ aiLoading[d.id] ? 'İnceleniyor...' : 'AI ile Analiz Et' }}
+                    </button>
+                    <div *ngIf="aiResult[d.id]" class="ai-sonuc">
+                      <strong>✨ Yapay Zeka:</strong><br>
+                      <span [innerHTML]="aiResult[d.id]"></span>
+                    </div>
+                  </div>
                 </div>
-
                 <p *ngIf="!i.dosyalar?.length" class="bos-gorsel">Henüz görsel eklenmemiş.</p>
-
-                <!-- Yükle butonu -->
                 <input #dosyaInput type="file" accept=".jpg,.jpeg,.png"
                        style="display:none"
                        (change)="dosyaSec($event, i)">
-
-              
               </div>
 
-              <!-- Butonlar -->
+              <div class="detay-bolum">
+                <div class="detay-baslik"><mat-icon>forum</mat-icon> Ekip İçi Canlı Sohbet (Real-Time)</div>
+
+                <div class="chat-konteyner">
+
+                  <div class="chat-mesaj-listesi">
+                    <ng-container *ngIf="chatMesajlari[i.id] | async as mesajlar; else yukleniyor">
+
+                      <div *ngFor="let m of mesajlar"
+                           class="chat-balon"
+                           [class.benim]="m.gonderenId === benimId"
+                           [class.onlarin]="m.gonderenId !== benimId">
+                        <div class="balon-isim">{{ m.gonderenAd }}</div>
+
+                        <div class="balon-metin" *ngIf="m.tip === 'metin' || !m.tip">{{ m.metin }}</div>
+
+                        <div *ngIf="m.tip === 'dosya' && m.dosyaTip?.startsWith('image/')">
+                          <a [href]="baseUrl + '/' + m.dosyaUrl" target="_blank">
+                            <img [src]="baseUrl + '/' + m.dosyaUrl" class="chat-resim-onizleme" [alt]="m.metin" />
+                          </a>
+                        </div>
+
+                        <div *ngIf="m.tip === 'dosya' && !m.dosyaTip?.startsWith('image/')" class="chat-dosya-link">
+                          <mat-icon>insert_drive_file</mat-icon>
+                          <a [href]="baseUrl + '/' + m.dosyaUrl" target="_blank">{{ m.metin }}</a>
+                        </div>
+
+                      </div>
+
+                      <div *ngIf="mesajlar.length === 0" class="chat-bos">
+                        Bu kayıt için henüz bir sohbet başlatılmadı. İlk mesajı sen yaz!
+                      </div>
+
+                    </ng-container>
+
+                    <ng-template #yukleniyor>
+                      <div style="text-align: center; color: #6366f1; padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                        <mat-spinner diameter="24" style="margin-bottom: 10px;"></mat-spinner>
+                        <span style="font-size: 0.85rem;">Firebase'den veriler çekiliyor...</span>
+                      </div>
+                    </ng-template>
+                  </div>
+
+                  <div class="chat-input-satir">
+
+                    <input #chatDosyaInput type="file"
+                           accept="image/*, .pdf"
+                           style="display:none"
+                           (change)="chatDosyaSec($event, i)">
+                    <button class="chat-dosya-btn"
+                            (click)="chatDosyaInput.click()"
+                            [disabled]="chatDosyaYukleniyor[i.id]">
+                      <mat-icon *ngIf="!chatDosyaYukleniyor[i.id]">attach_file</mat-icon>
+                      <mat-spinner *ngIf="chatDosyaYukleniyor[i.id]" diameter="18"></mat-spinner>
+                    </button>
+
+                    <input
+                      [(ngModel)]="yeniChatMesaj[i.id]"
+                      (keydown.enter)="chatGonder(i)"
+                      placeholder="Ekibe bir not yaz..."
+                      class="chat-input" />
+
+                    <button class="chat-gonder-btn"
+                            (click)="chatGonder(i)"
+                            [disabled]="!yeniChatMesaj[i.id]?.trim()">
+                      <mat-icon>send</mat-icon>
+                    </button>
+
+                  </div>
+
+                </div>
+              </div>
+
               <div class="detay-butonlar">
                 <button mat-stroked-button class="exp-btn" (click)="musteriyeGit(i.musteriId)">
                   <mat-icon>person</mat-icon> Müşteri
@@ -123,7 +194,6 @@
                 </button>
               </div>
 
-              <!-- Yeni işlem ekle -->
               <div class="islem-ekle-wrap">
                 <div class="detay-baslik"><mat-icon>add_comment</mat-icon> Yeni İşlem Ekle</div>
                 <div class="islem-ekle-satir">
@@ -151,7 +221,10 @@
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-          class="ana-satir" [class.acik-satir]="expandedElement === row"></tr>
+          class="ana-satir"
+          [class.acik-satir]="expandedElement === row"
+          [id]="'satir-' + (row.id || row.iletisimId)">
+      </tr>
       <tr mat-row *matRowDef="let row; columns: ['expandedDetail']"
           class="detay-satir"></tr>
 

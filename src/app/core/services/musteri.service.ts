@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Musteri } from '../../models/musteri';
 import { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs'; // firstValueFrom eklendi
 
 export interface PagedResponse<T> {
   totalCount: number;
@@ -141,4 +142,20 @@ mailGonder(data: any) {
 getGonderilenMailler(musteriId: number) {
   return this.http.get<any[]>(`${this.baseUrl}/mail/liste/${musteriId}`);
 }
+
+resmiYapayZekayaAnalizEttir(file: File) {
+    const formData = new FormData();
+    formData.append('dosya', file);
+    
+    // toPromise() yerine firstValueFrom içine alıyoruz
+    const request = this.http.post<any>(`${this.baseUrl}/iletisim/yapay-zeka-analiz`, formData);
+    return firstValueFrom(request);
+  }
+
+// Zaten C# sunucusunda olan resmi ID ile analiz ettirme
+  kayitliResmiAnalizEt(dosyaId: number) {
+    const request = this.http.get<any>(`${this.baseUrl}/iletisim/yapay-zeka-analiz-kayitli/${dosyaId}`);
+    return firstValueFrom(request);
+  }
+
 }
