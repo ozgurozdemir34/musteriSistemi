@@ -22,6 +22,11 @@ export class AdminService {
     return this.http.get<KullaniciRow[]>(`${this.baseUrl}/kullanici`);
   }
 
+  // Mention icin: tum aktif kullanicilari getir (admin izni gerekmez)
+  aktifKullanicilar(): Observable<{ id: number; ad: string; soyad: string; kullaniciadi: string }[]> {
+    return this.http.get<{ id: number; ad: string; soyad: string; kullaniciadi: string }[]>(`${this.baseUrl}/kullanici/aktifler`);
+  }
+
   
   pasifYap(id: number) {
     return this.http.put(`${this.baseUrl}/kullanici/pasif/${id}`, {});

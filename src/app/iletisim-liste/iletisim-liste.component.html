@@ -121,7 +121,7 @@
                            class="chat-balon"
                            [class.benim]="m.gonderenId === benimId"
                            [class.onlarin]="m.gonderenId !== benimId">
-                        <div class="balon-isim">{{ m.gonderenAd }}</div>
+                        <div class="balon-isim">&#64;{{ m.gonderenKullaniciadi || m.gonderenAd }}</div>
 
                         <div class="balon-metin" *ngIf="m.tip === 'metin' || !m.tip">{{ m.metin }}</div>
 
@@ -152,7 +152,21 @@
                     </ng-template>
                   </div>
 
-                  <div class="chat-input-satir">
+                  <div class="chat-input-satir" style="position: relative;">
+
+                    <!-- Mention Dropdown -->
+                    <div *ngIf="mentionAktif[i.id] && mentionDropdown[i.id]?.length"
+                         class="mention-dropdown">
+                      <div *ngFor="let k of mentionDropdown[i.id]"
+                           class="mention-item"
+                           (mousedown)="mentionSec(k, i)">
+                        <span class="mention-avatar">{{ k.kullaniciadi?.charAt(0) }}</span>
+                        <div class="mention-bilgi">
+                          <span class="mention-kullaniciadi">&#64;{{ k.kullaniciadi }}</span>
+                          <span class="mention-adsoyad">{{ k.ad }} {{ k.soyad }}</span>
+                        </div>
+                      </div>
+                    </div>
 
                     <input #chatDosyaInput type="file"
                            accept="image/*, .pdf"
@@ -166,9 +180,11 @@
                     </button>
 
                     <input
+                      [id]="'chat-input-' + i.id"
                       [(ngModel)]="yeniChatMesaj[i.id]"
+                      (input)="chatInputDegisti($event, i)"
                       (keydown.enter)="chatGonder(i)"
-                      placeholder="Ekibe bir not yaz..."
+                      placeholder="Ekibe bir not yaz... (@isim ile etiketle)"
                       class="chat-input" />
 
                     <button class="chat-gonder-btn"

@@ -21,36 +21,34 @@ export class ChatService {
     return collectionData(q, { idField: 'id' });
   }
 
-  mesajGonder(iletisimId: string, benimId: number, benimAd: string, metin: string) {
+  mesajGonder(iletisimId: string, benimId: number, benimKullaniciadi: string, metin: string, mentions: number[] = []) {
     const mesajlarRef = collection(this.firestore, `iletisimler/${iletisimId}/mesajlar`);
     return addDoc(mesajlarRef, {
       gonderenId: benimId,
-      gonderenAd: benimAd,
+      gonderenKullaniciadi: benimKullaniciadi,
       metin: metin,
       tip: 'metin',
-      tarih: new Date().toISOString()
+      tarih: new Date().toISOString(),
+      mentions: mentions
     });
   }
 
-  async dosyaGonder(iletisimId: string, benimId: number, benimAd: string, dosya: File) {
-    // 1. Resmi Firebase Storage yerine kendi .NET API'mize yüklüyoruz!
+  async dosyaGonder(iletisimId: string, benimId: number, benimKullaniciadi: string, dosya: File) {
     const formData = new FormData();
     formData.append('dosya', dosya);
     formData.append('iletisimId', iletisimId);
 
-    // API'ye yollayıp C#'tan dönen güvenli URL'yi bekliyoruz
     const uploadRes: any = await firstValueFrom(
       this.http.post(`${this.baseUrl}/iletisim/chatdosyayukle`, formData)
     );
 
-    // 2. .NET'ten dönen URL'yi Firestore'a (Chat veritabanına) yazıyoruz
     const mesajlarRef = collection(this.firestore, `iletisimler/${iletisimId}/mesajlar`);
     return addDoc(mesajlarRef, {
       gonderenId: benimId,
-      gonderenAd: benimAd,
+      gonderenKullaniciadi: benimKullaniciadi,
       metin: uploadRes.ad,
-      dosyaUrl: uploadRes.url, // Artık uploads/chat/8/resim.jpg şeklinde geliyor
-      dosyaTip: uploadRes.tip, 
+      dosyaUrl: uploadRes.url,
+      dosyaTip: uploadRes.tip,
       tip: 'dosya',
       tarih: new Date().toISOString()
     });

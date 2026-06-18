@@ -17,6 +17,7 @@ import { IletisimIslemGecmisiComponent } from '../iletisim-islem-gecmisi/iletisi
 import { AtananCaseDialogComponent } from '../atanan-case-dialog/atanan-case-dialog.component';
 import { CaseAtaDialogComponent } from '../case-ata-dialog/case-ata-dialog.component';
 import { ChatService } from '../core/services/chat.service';
+import { AdminService } from '../core/services/admin.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -48,6 +49,7 @@ export class IletisimListeComponent implements OnInit {
   yeniChatMesaj: { [key: number]: string } = {};
   benimId: number = 0;
   benimAd: string = '';
+  benimKullaniciadi: string = '';
   page = 1;
   totalCount = 0;
   pageSize = 20;
@@ -65,6 +67,12 @@ export class IletisimListeComponent implements OnInit {
 
   hedefIletisimId: number | null = null;
 
+  // Mention (@ etiketi) ile ilgili state
+  tumKullanicilar: { id: number; ad: string; soyad: string; kullaniciadi: string }[] = [];
+  mentionDropdown: { [key: number]: { id: number; ad: string; soyad: string; kullaniciadi: string }[] } = {};
+  mentionAktif: { [key: number]: boolean } = {};
+  mentionKelime: { [key: number]: string } = {};
+
   dropdownMap: any = {};
   objectKeys = Object.keys;
 
@@ -75,12 +83,14 @@ export class IletisimListeComponent implements OnInit {
     private router: Router,
     private dialog: MatDialog,
     private chatService: ChatService,
+    private adminService: AdminService,
     private route: ActivatedRoute,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
   ngOnInit() {
     this.kullaniciBilgileriniCek();
+    this.kullanicilariYukle();
 
     if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
       Notification.requestPermission();
@@ -102,6 +112,13 @@ export class IletisimListeComponent implements OnInit {
     });
   }
 
+  kullanicilariYukle() {
+    this.adminService.aktifKullanicilar().subscribe({
+      next: (res) => { this.tumKullanicilar = res; },
+      error: () => console.warn('Kullanici listesi alinamadi, mention ozelligi calismiyor olabilir.')
+    });
+  }
+
   kullaniciBilgileriniCek() {
     try {
       const userData = localStorage.getItem('user');
@@ -109,6 +126,7 @@ export class IletisimListeComponent implements OnInit {
         const user = JSON.parse(userData);
         this.benimId = user.id || 0;
         this.benimAd = (user.ad && user.soyad) ? (user.ad + ' ' + user.soyad) : 'Gizemli Kullanıcı';
+        this.benimKullaniciadi = user.Kullaniciadi || user.kullaniciadi || '';
       }
     } catch (e) {
       console.error(e);
@@ -154,8 +172,14 @@ export class IletisimListeComponent implements OnInit {
           if (guncelSayi > eskiSayi) {
             const sonMesaj = data[guncelSayi - 1];
             if (sonMesaj.gonderenId !== this.benimId) {
-              const bildirimMetin = sonMesaj.tip === 'dosya' ? `📎 ${sonMesaj.metin}` : sonMesaj.metin;
-              this.bildirimGonder(sonMesaj.gonderenAd, bildirimMetin, id);
+              // 1) Mention bildirimi: bu mesajda ben etiketlendim mi?
+              const mentions: number[] = sonMesaj.mentions ?? [];
+              if (mentions.includes(this.benimId)) {
+                this.mentionBildirimiGonder(sonMesaj.gonderenKullaniciadi, sonMesaj.metin, id);
+              } else {
+                const bildirimMetin = sonMesaj.tip === 'dosya' ? `📎 ${sonMesaj.metin}` : sonMesaj.metin;
+                this.bildirimGonder(sonMesaj.gonderenKullaniciadi, bildirimMetin, id);
+              }
             }
           }
 
@@ -175,6 +199,22 @@ export class IletisimListeComponent implements OnInit {
 
     if (Notification.permission === "granted") {
       const bildirim = new Notification(`Yeni Mesaj: ${kimden}`, {
+        body: metin
+      });
+
+      bildirim.onclick = () => {
+        window.focus();
+        bildirim.close();
+        this.router.navigate(['/iletisim'], { queryParams: { hedefId: iletisimId } });
+      };
+    }
+  }
+
+  mentionBildirimiGonder(kimden: string, metin: string, iletisimId: number) {
+    if (!("Notification" in window)) return;
+
+    if (Notification.permission === "granted") {
+      const bildirim = new Notification(`🔔 ${kimden} senden bahsetti!`, {
         body: metin
       });
 
@@ -236,8 +276,93 @@ export class IletisimListeComponent implements OnInit {
     const id = row.id || row.iletisimId;
     const metin = this.yeniChatMesaj[id]?.trim();
     if (!metin) return;
-    this.chatService.mesajGonder(id.toString(), this.benimId, this.benimAd, metin);
+
+    const mentions = this.mentionIdleriniCikar(metin);
+
+    this.chatService.mesajGonder(id.toString(), this.benimId, this.benimKullaniciadi, metin, mentions);
     this.yeniChatMesaj[id] = '';
+    this.mentionAktif[id] = false;
+    this.mentionDropdown[id] = [];
+  }
+
+  // Metinden @kullaniciadi ifadelerini bulup ID'ye cevir
+  mentionIdleriniCikar(metin: string): number[] {
+    const ids: number[] = [];
+    const regex = /@([\w.]+)/g;  // kullaniciadi bosluk icermez, basit regex yeterli
+    let match;
+    while ((match = regex.exec(metin)) !== null) {
+      const aranan = match[1].toLowerCase();
+      const bulunan = this.tumKullanicilar.find(k =>
+        k.kullaniciadi.toLowerCase() === aranan
+      );
+      if (bulunan && !ids.includes(bulunan.id)) {
+        ids.push(bulunan.id);
+      }
+    }
+    return ids;
+  }
+
+  // Input'ta @ yazildiginda autocomplete ac
+  chatInputDegisti(event: Event, row: any) {
+    const id = row.id || row.iletisimId;
+    const input = event.target as HTMLInputElement;
+    const metin = input.value;
+    const cursorPos = input.selectionStart ?? metin.length;
+
+    const metinSoldan = metin.substring(0, cursorPos);
+    const atIndex = metinSoldan.lastIndexOf('@');
+
+    if (atIndex === -1) {
+      this.mentionAktif[id] = false;
+      this.mentionDropdown[id] = [];
+      return;
+    }
+
+    // @'den cursor'a kadar — kullaniciadi bosluk icermez, bosluk gorununce kapat
+    const arananHam = metinSoldan.substring(atIndex + 1);
+
+    if (arananHam.includes(' ')) {
+      this.mentionAktif[id] = false;
+      this.mentionDropdown[id] = [];
+      return;
+    }
+
+    const aranan = arananHam.toLowerCase();
+    this.mentionKelime[id] = aranan;
+
+    if (aranan.length === 0) {
+      this.mentionDropdown[id] = this.tumKullanicilar.filter(k => k.id !== this.benimId);
+      this.mentionAktif[id] = true;
+      return;
+    }
+
+    const filtrelenmis = this.tumKullanicilar.filter(k =>
+      k.id !== this.benimId &&
+      k.kullaniciadi.toLowerCase().startsWith(aranan)
+    );
+
+    this.mentionDropdown[id] = filtrelenmis;
+    this.mentionAktif[id] = filtrelenmis.length > 0;
+  }
+
+  // Dropdown'dan kullanici secildiginde input'u guncelle
+  mentionSec(kullanici: { id: number; ad: string; soyad: string; kullaniciadi: string }, row: any) {
+    const id = row.id || row.iletisimId;
+    const metin = this.yeniChatMesaj[id] ?? '';
+    const atIndex = metin.lastIndexOf('@');
+
+    if (atIndex !== -1) {
+      const once = metin.substring(0, atIndex);
+      this.yeniChatMesaj[id] = once + '@' + kullanici.kullaniciadi + ' ';
+    }
+
+    this.mentionAktif[id] = false;
+    this.mentionDropdown[id] = [];
+
+    setTimeout(() => {
+      const inputEl = document.getElementById(`chat-input-${id}`) as HTMLInputElement;
+      if (inputEl) inputEl.focus();
+    }, 50);
   }
 
   async chatDosyaSec(event: any, row: any) {
@@ -248,7 +373,7 @@ export class IletisimListeComponent implements OnInit {
     this.chatDosyaYukleniyor[id] = true;
 
     try {
-      await this.chatService.dosyaGonder(id.toString(), this.benimId, this.benimAd, dosya);
+      await this.chatService.dosyaGonder(id.toString(), this.benimId, this.benimKullaniciadi, dosya);
     } catch (e) {
       alert('Dosya gönderilemedi');
       console.error(e);
